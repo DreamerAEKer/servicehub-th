@@ -5424,13 +5424,11 @@ window.openServiceDetail = (id) => {
   }
 
   // 2. RELATED MEMOS & ORDERS (SORTED NEWEST FIRST)
-  const serviceKeywords = [cleanTitle.toLowerCase()];
-  if (groupKey) serviceKeywords.push(groupKey.toLowerCase());
-
+  // Clean matching: Prevent standard EMS from picking up Jumbo / Logispost memos
+  const isStandardEms = (groupKey === 'ems') && (primaryService.id !== 'domestic-ems-jumbo');
   const relatedMemos = [];
   const processedUrls = new Set();
 
-  // Search across all services & attachments for memos referencing this service
   state.services.forEach(s => {
     (s.blocks || []).forEach(b => {
       if (b.type === 'pdf_embed') {
@@ -5439,14 +5437,28 @@ window.openServiceDetail = (id) => {
           const lTitle = l.title || l.name || '';
           const lUrl = l.url || '';
           if (lUrl && !processedUrls.has(lUrl)) {
-            const isMatched = serviceKeywords.some(kw => 
-              lTitle.toLowerCase().includes(kw) || 
-              (s.name || '').toLowerCase().includes(kw) ||
-              (s.service_group && s.service_group === groupKey)
-            );
+            const isJumboDoc = /jumbo|โลจิสต์โพสต์|logispost|roll pallet|พิกัดน้ำหนัก/i.test(lTitle) || /jumbo|โลจิสต์โพสต์|logispost/i.test(s.name);
+            
+            let isMatched = false;
+            if (isStandardEms) {
+              // Standard EMS must EXCLUDE Jumbo / Logispost items
+              if (!isJumboDoc && ((s.service_group === 'ems') || (s.name || '').toLowerCase().includes('ems'))) {
+                isMatched = true;
+              }
+            } else if (groupKey === 'emsjumbo' || primaryService.id === 'domestic-ems-jumbo') {
+              // EMS Jumbo must INCLUDE Jumbo / Logispost items
+              if (isJumboDoc || s.service_group === 'emsjumbo') {
+                isMatched = true;
+              }
+            } else {
+              isMatched = (s.service_group && s.service_group === groupKey) || (s.name || '').toLowerCase().includes(cleanTitle.toLowerCase()) || lTitle.toLowerCase().includes(cleanTitle.toLowerCase());
+            }
+
             if (isMatched) {
               processedUrls.add(lUrl);
               relatedMemos.push({
+                serviceId: s.id,
+                blockId: b.id,
                 title: lTitle,
                 url: lUrl,
                 date: l.date || s.start_date || s.updated_at || '2026-01-01',
@@ -5477,20 +5489,28 @@ window.openServiceDetail = (id) => {
         <div style="display: flex; flex-direction: column; gap: 8px;">
           ${relatedMemos.map(m => `
             <div style="display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); gap: 8px; flex-wrap: wrap;">
-              <div style="display: flex; align-items: center; gap: 8px; overflow: hidden; max-width: 65%;">
+              <div style="display: flex; align-items: center; gap: 8px; overflow: hidden; max-width: 55%;">
                 <i data-lucide="file-text" style="color: #64d2ff; width: 15px; height: 15px; flex-shrink: 0;"></i>
                 <div>
-                  <div style="font-size: 0.82rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${m.title}</div>
-                  <div style="font-size: 0.7rem; color: var(--text-tertiary);">📅 ${m.date ? formatThaiDate(m.date) : 'บันทึกล่าสุด'}</div>
+                  <div style="font-size: 0.82rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${m.title}">${m.title}</div>
+                  <div style="font-size: 0.7rem; color: var(--text-tertiary);">📅 ${m.date ? formatThaiDate(m.date) : 'บันทึกล่าสุด'} ${m.sourceService ? `<span style="color: var(--apple-blue);">• จาก: ${m.sourceService}</span>` : ''}</div>
                 </div>
               </div>
-              <div style="display: flex; gap: 6px; align-items: center;">
-                <a href="${m.url}" download="${m.title}.pdf" target="_blank" rel="noreferrer noopener" class="btn btn-secondary" style="font-size: 0.72rem; padding: 3px 8px; color: #30d158; border-color: rgba(48,209,88,0.35);">
-                  <i data-lucide="download" style="width: 12px; height: 12px;"></i> ดาวน์โหลด
+              <div style="display: flex; gap: 5px; align-items: center; flex-wrap: wrap;">
+                <a href="${m.url}" download="${m.title}.pdf" target="_blank" rel="noreferrer noopener" class="btn btn-secondary" style="font-size: 0.72rem; padding: 3px 8px; color: #30d158; border-color: rgba(48,209,88,0.35);" title="ดาวน์โหลด">
+                  <i data-lucide="download" style="width: 12px; height: 12px;"></i> โหลด
                 </a>
-                <button class="btn btn-secondary" style="font-size: 0.72rem; padding: 3px 8px; color: #64d2ff;" onclick="window.openFullscreenDoc('${m.title.replace(/'/g, "\\'")}', '${getEmbedUrl(m.url)}', '${m.url}')">
+                <button class="btn btn-secondary" style="font-size: 0.72rem; padding: 3px 8px; color: #64d2ff;" onclick="window.openFullscreenDoc('${m.title.replace(/'/g, "\\'")}', '${getEmbedUrl(m.url)}', '${m.url}')" title="เปิดอ่านเต็มจอ">
                   <i data-lucide="maximize-2" style="width: 12px; height: 12px;"></i> เปิดอ่าน
                 </button>
+                ${state.isAdmin ? `
+                  <button class="btn btn-secondary" style="font-size: 0.72rem; padding: 3px 8px; color: #ffd60a; background: rgba(255, 214, 10, 0.1); border-color: rgba(255, 214, 10, 0.3);" onclick="window.openMoveBlockModal('${m.serviceId}', '${m.blockId}', '${m.title.replace(/'/g, "\\'")}')" title="ย้ายไฟล์นี้ไปยังบริการอื่น">
+                    <i data-lucide="arrow-right-left" style="width: 12px; height: 12px;"></i> ย้าย
+                  </button>
+                  <button class="btn btn-secondary danger" style="font-size: 0.72rem; padding: 3px 8px; color: #ff453a; background: rgba(255, 69, 58, 0.1); border-color: rgba(255, 69, 58, 0.3);" onclick="window.quickDeletePdfFileFromBlock('${m.serviceId}', '${m.blockId}', '${m.title.replace(/'/g, "\\'")}')" title="ลบไฟล์นี้">
+                    <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
+                  </button>
+                ` : ''}
               </div>
             </div>
           `).join('')}
@@ -9062,9 +9082,11 @@ function setupEventListeners() {
     const sourceDisplay = document.getElementById('move-source-item-display');
     const sourceServiceDisplay = document.getElementById('move-source-service-display');
     const targetSelect = document.getElementById('move-target-service-id');
+    const fileTitleInput = document.getElementById('move-source-file-title');
 
     moveSourceServiceId.value = service.id;
-    moveSourceBlockId.value = blockId;
+    moveSourceBlockId.value = blockId || '';
+    if (fileTitleInput) fileTitleInput.value = title || '';
     moveIsFullCard.value = 'false';
 
     if (sourceDisplay) sourceDisplay.innerText = `📄 ไฟล์: ${title}`;
@@ -9096,6 +9118,7 @@ function setupEventListeners() {
       e.preventDefault();
       const sId = moveSourceServiceId.value;
       const bId = moveSourceBlockId.value;
+      const fileTitle = document.getElementById('move-source-file-title')?.value || '';
       const isFull = moveIsFullCard.value === 'true';
       const targetId = moveTargetServiceId.value;
 
@@ -9129,6 +9152,47 @@ function setupEventListeners() {
           await deleteDoc(doc(db, sourceService.collectionName || 'categories', sId));
         } catch (e) {
           console.warn('Delete source card on move:', e.message);
+        }
+      } else if (fileTitle) {
+        // Move specific PDF link from source block to target service
+        let movedLinkObj = null;
+        for (const block of (sourceService.blocks || [])) {
+          if (block.type === 'pdf_embed') {
+            if (Array.isArray(block.data)) {
+              const linkIdx = block.data.findIndex(l => (l.title || l.name) === fileTitle);
+              if (linkIdx !== -1) {
+                [movedLinkObj] = block.data.splice(linkIdx, 1);
+                break;
+              }
+            } else if (block.data?.links) {
+              const linkIdx = block.data.links.findIndex(l => (l.title || l.name) === fileTitle);
+              if (linkIdx !== -1) {
+                [movedLinkObj] = block.data.links.splice(linkIdx, 1);
+                break;
+              }
+            }
+          }
+        }
+
+        if (movedLinkObj) {
+          // Add to target service's pdf_embed block or create a new one
+          let targetPdfBlock = targetService.blocks.find(b => b.type === 'pdf_embed');
+          if (!targetPdfBlock) {
+            targetPdfBlock = {
+              id: 'blk_pdf_' + Date.now(),
+              type: 'pdf_embed',
+              title: '📁 บันทึกสั่งการ & เอกสารแนบ',
+              data: []
+            };
+            targetService.blocks.push(targetPdfBlock);
+          }
+          if (Array.isArray(targetPdfBlock.data)) {
+            targetPdfBlock.data.push(movedLinkObj);
+          } else {
+            if (!targetPdfBlock.data) targetPdfBlock.data = { links: [] };
+            if (!targetPdfBlock.data.links) targetPdfBlock.data.links = [];
+            targetPdfBlock.data.links.push(movedLinkObj);
+          }
         }
       } else {
         // Move single block
