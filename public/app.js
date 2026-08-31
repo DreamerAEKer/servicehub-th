@@ -24,7 +24,7 @@ import {
   getDownloadURL
 } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js';
 
-const APP_VERSION = 'v140.1';
+const APP_VERSION = 'v141.0';
 const DEFAULT_ADMIN_PIN = '10501';
 const DEFAULT_RECOVERY_KEY = 'Gpo10501';
 const REGISTERED_ADMIN_EMAIL = 'pnk10501@gmail.com';
@@ -1211,12 +1211,60 @@ const DEFAULT_DOMESTIC_SERVICES = [
           size: '📏 ขนาดมาตรฐาน: กว้าง + ยาว + สูง รวมกันไม่เกิน 120 ซม. (ด้านยาวสุด ≤ 60 ซม.) | เกินมาตรฐาน: รวมกันได้สูงสุด ≤ 240 ซม.',
           sla: '⏱️ ระยะเวลานำจ่าย: ถึงผู้รับใน 1 - 2 วันทำการ ทั่วไทย',
           rate: '🛡️ วงเงินคุ้มครอง: ชดใช้สูงสุดไม่เกิน 2,000 บาท ต่อชิ้น',
-          pos: '💻 รหัสรับฝากในระบบ CA POS: `รหัส 831` (EMS ในประเทศ เงินสด 37 บ.), `รหัส 833` (EMS ในธุรกิจ ปณท. 0 บ.), `รหัส 2886` (EMS ขนาดใหญ่ 37 บ.)'
+          pos: '💻 รหัสรับฝากในระบบ CA POS: `รหัส 831` (EMS ในประเทศ เงินสด 37 บ.), `รหัส 833` (EMS ในธุรกิจ ปณท. 0 บ.)'
         }
       }
     ],
     active: true,
     order: 6,
+    isLocalFallback: true
+  },
+  {
+    id: 'domestic-ems-jumbo',
+    name: '🚛 EMS Jumbo (โลจิสต์โพสต์)',
+    service_group: 'emsjumbo',
+    category_type: 'domestic',
+    color: '#ff9500',
+    icon: 'truck',
+    summary: 'ส่งของชิ้นใหญ่ หนัก 30 - 200 กก. (โลจิสต์โพสต์เดิม) เครื่องใช้ไฟฟ้า ยานพาหนะ และ Roll Pallet',
+    description: 'บริการส่งของขนาดใหญ่และสิ่งของพิเศษ (ชื่อเดิม โลจิสต์โพสต์ / Logispost) รองรับน้ำหนัก 30 - 200 กิโลกรัม พร้อมบริการ Pick-up รับถึงบ้านและส่งตรงถึงมือผู้รับ (Door to Door) หรือรับ ณ ที่ทำการไปรษณีย์ (Station to Station)',
+    specs: {
+      weight: 'น้ำหนัก 30 - 200 กิโลกรัม ต่อชิ้น',
+      size: 'แต่ละด้านไม่เกิน 150x200x150 ซม. หรือปริมาตรไม่เกิน 4.5 ลบ.ม.',
+      sla: '2 - 4 วันทำการ ทั่วประเทศ',
+      rate: 'คิดตามพิกัดน้ำหนักจริงหรือตามขนาด/เหมา Roll Pallet (รหัส POS 2886)'
+    },
+    blocks: [
+      {
+        id: 'blk_jumbo_specs',
+        type: 'specs_table',
+        title: '📋 1. สรุปพิกัดและเงื่อนไข EMS Jumbo (โลจิสต์โพสต์)',
+        data: {
+          weight: '🚛 น้ำหนักรับฝาก: ตั้งแต่ 30 กก. ขึ้นไป สูงสุด 200 กก. ต่อชิ้น',
+          size: '📏 ขนาดสิ่งของ: กว้าง/ยาว/สูง ด้านละไม่เกิน 150x200x150 ซม. (Roll Pallet สูงไม่เกิน 170 ซม.)',
+          sla: '⏱️ ระยะเวลานำจ่าย: 2 - 4 วันทำการ (ขึ้นอยู่กับเส้นทางและพื้นที่)',
+          rate: '🛡️ วงเงินคุ้มครอง: ชดใช้ตามมูลค่าจริง สูงสุด 3,000 - 50,000 บาท (ซื้อประกันเพิ่มได้)',
+          pos: '💻 รหัสรับฝากในระบบ CA POS: `รหัส 2886` (EMS Jumbo / โลจิสต์โพสต์)'
+        }
+      },
+      {
+        id: 'blk_jumbo_categories_table',
+        type: 'custom_table',
+        title: '📊 2. หมวดหมู่สิ่งของขนาดใหญ่ยอดนิยม (EMS Jumbo)',
+        data: {
+          headers: ['ประเภทสิ่งของ', 'มาตรฐานการรับฝาก', 'คำแนะนำการหุ้มห่อ'],
+          rows: [
+            ['จักรยานยนต์ / บิ๊กไบค์', 'ถ่ายน้ำมันเชื้อเพลิงออกหมด', 'หุ้มกันกระแทกแฮนด์ กระจกมองข้าง และตัวถัง'],
+            ['ตู้เย็น / เครื่องซักผ้า', 'ยึดฝาและท่อน้ำทิ้งให้แน่น', 'ครอบกล่องกระดาษลูกฟูกหนาและรัดสาย'],
+            ['ทีวี LED / จอคอมพิวเตอร์', 'บรรจุในกล่องโฟมเดิมหรือโฟมหนา', 'ติดสติกเกอร์ระวังแตก (Fragile)'],
+            ['เฟอร์นิเจอร์ / ฟูกที่นอน', 'หุ้มพลาสติก Stretch Film มิดชิด', 'ป้องกันฝุ่นละอองและความชื้น'],
+            ['เหมา Roll Pallet (OTOP/นศ.)', 'จัดวางใน Roll Pallet ไม่ล้นขอบ', 'พันฟิล์มรัดรอบตะแกรง Pallet ให้แน่นหนา']
+          ]
+        }
+      }
+    ],
+    active: true,
+    order: 6.5,
     isLocalFallback: true
   },
   {
@@ -4493,6 +4541,7 @@ const PILLAR_SERVICES_ORDER = [
   { group: 'ecopost', name: '🚛 eCo-Post', icon: 'truck', color: '#0071e3', summary: 'ส่งแบบประหยัดสายพันธุ์ใหม่ หนักได้ถึง 10 กก. คุ้มครอง 1,500 บ.' },
   { group: 'epacket', name: '🌐 ePacket', icon: 'send', color: '#0071e3', summary: 'สุดคุ้มสำหรับ e-Commerce ข้ามพรมแดน ชิ้นเล็กส่งไปทั่วโลก' },
   { group: 'ems', name: '⚡ EMS', icon: 'zap', color: '#ff9500', summary: 'ส่งด่วนพิเศษมาตรฐานสูงสุด (ทั้งในประเทศ และ ระหว่างประเทศ)' },
+  { group: 'emsjumbo', name: '🚛 EMS Jumbo (โลจิสต์โพสต์)', icon: 'truck', color: '#ff9500', summary: 'ส่งของชิ้นใหญ่ หนัก 30-200 กก. (โลจิสต์โพสต์เดิม) มีบริการรับ-ส่งถึงที่' },
   { group: 'courierpost', name: '✈️ Courier Post', icon: 'plane', color: '#ff453a', summary: 'ส่งด่วนพรีเมียมถึงมือผู้รับใน 2-4 วัน ร่วมกับ DHL Express' },
   { group: 'admail', name: '📰 Advertising Mail', icon: 'newspaper', color: '#30d158', summary: 'สื่อโฆษณา แผ่นพับ ใบปลิว ปูพรมถึงบ้านผู้รับตามพื้นที่' },
   { group: 'travellite', name: '🧳 Travel Lite', icon: 'briefcase', color: '#30d158', summary: 'ส่งกระเป๋าเดินทางและสัมภาระท่องเที่ยว ตรงถึงโรงแรม/สนามบิน' }
@@ -4961,6 +5010,65 @@ window.toggleDualPaneCollapse = (mode) => {
   });
 };
 
+window.quickShiftDetailBlock = async (serviceId, blockIdx, direction) => {
+  if (!state.isAdmin) return;
+  const service = state.services.find(s => s.id === serviceId);
+  if (!service || !Array.isArray(service.blocks)) return;
+
+  const targetIdx = blockIdx + direction;
+  if (targetIdx < 0 || targetIdx >= service.blocks.length) return;
+
+  const temp = service.blocks[blockIdx];
+  service.blocks[blockIdx] = service.blocks[targetIdx];
+  service.blocks[targetIdx] = temp;
+
+  try {
+    localStorage.setItem('dept_services_cache', JSON.stringify(state.services));
+  } catch (e) {}
+
+  try {
+    await setDoc(doc(db, service.collectionName || 'categories', service.id), {
+      blocks: service.blocks,
+      updated_at: serverTimestamp()
+    }, { merge: true });
+  } catch (e) {}
+
+  window.openServiceDetail(serviceId);
+  showToast('🔄 สลับลำดับข้อมูลเรียบร้อยแล้ว', 'success');
+};
+
+window.quickDeletePdfFileFromBlock = async (serviceId, blockId, pdfTitle) => {
+  if (!state.isAdmin) return;
+  if (!confirm(`ยืนยันการลบไฟล์ "${pdfTitle}" ออกจากการ์ดนี้ใช่หรือไม่?`)) return;
+
+  const service = state.services.find(s => s.id === serviceId);
+  if (!service || !Array.isArray(service.blocks)) return;
+
+  const block = service.blocks.find(b => b.id === blockId);
+  if (block) {
+    if (Array.isArray(block.data)) {
+      block.data = block.data.filter(l => (l.title || l.name) !== pdfTitle);
+    } else if (block.data?.links) {
+      block.data.links = block.data.links.filter(l => (l.title || l.name) !== pdfTitle);
+    }
+  }
+
+  try {
+    localStorage.setItem('dept_services_cache', JSON.stringify(state.services));
+  } catch (e) {}
+
+  try {
+    await setDoc(doc(db, service.collectionName || 'categories', service.id), {
+      blocks: service.blocks,
+      updated_at: serverTimestamp()
+    }, { merge: true });
+  } catch (e) {}
+
+  window.openServiceDetail(serviceId);
+  renderServicesView();
+  showToast(`🗑️ ลบไฟล์ "${pdfTitle}" เรียบร้อยแล้ว`, 'success');
+};
+
 function renderServiceBlockItem(block, bIdx, serviceId, blocksLength) {
   const getBlockAdminShiftControls = (idx) => {
     if (!state.isAdmin || blocksLength <= 1) return '';
@@ -5122,6 +5230,14 @@ function renderServiceBlockItem(block, bIdx, serviceId, blocksLength) {
               <button class="btn btn-secondary" style="font-size: 0.72rem; padding: 3px 8px; color: #64d2ff; background: rgba(100, 210, 255, 0.08);" onclick="window.openFullscreenDoc('${title.replace(/'/g, "\\'")}', '${embedUrl}', '${url}')" title="เปิดดูเต็มจอ">
                 <i data-lucide="maximize-2" style="width: 12px; height: 12px;"></i> เต็มจอ
               </button>
+              ${state.isAdmin ? `
+                <button class="btn btn-secondary" style="font-size: 0.72rem; padding: 3px 8px; color: #ffd60a; background: rgba(255, 214, 10, 0.1); border-color: rgba(255, 214, 10, 0.3);" onclick="window.openMoveBlockModal('${serviceId}', '${block.id}', '${title.replace(/'/g, "\\'")}')" title="ย้ายไฟล์นี้ไปยังบริการอื่น">
+                  <i data-lucide="arrow-right-left" style="width: 12px; height: 12px;"></i> ย้าย
+                </button>
+                <button class="btn btn-secondary danger" style="font-size: 0.72rem; padding: 3px 8px; color: #ff453a; background: rgba(255, 69, 58, 0.1); border-color: rgba(255, 69, 58, 0.3);" onclick="window.quickDeletePdfFileFromBlock('${serviceId}', '${block.id}', '${title.replace(/'/g, "\\'")}')" title="ลบไฟล์ PDF นี้">
+                  <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
+                </button>
+              ` : ''}
             </div>
           </div>
           ${isEmbeddable ? `
@@ -5211,12 +5327,20 @@ window.openServiceDetail = (id) => {
   const color = primaryService.color || '#0071e3';
   const icon = primaryService.icon || 'package';
   iconBox.style.background = `linear-gradient(135deg, ${color}, #0f172a)`;
-  iconBox.innerHTML = `<i data-lucide="${icon}"></i>`;
+  if (detailBtnEdit) {
+    detailBtnEdit.style.display = state.isAdmin ? 'inline-flex' : 'none';
+    detailBtnEdit.onclick = () => {
+      detailModal.classList.remove('active');
+      window.openEditModal(primaryService.id);
+    };
+  }
 
-  detailBtnEdit.onclick = () => {
-    detailModal.classList.remove('active');
-    window.openEditModal(primaryService.id);
-  };
+  if (detailBtnMove) {
+    detailBtnMove.style.display = state.isAdmin ? 'inline-flex' : 'none';
+    detailBtnMove.onclick = () => {
+      window.openMoveServiceModal(primaryService.id);
+    };
+  }
 
   if (detailBtnDelete) {
     detailBtnDelete.style.display = state.isAdmin ? 'inline-flex' : 'none';
@@ -6423,9 +6547,9 @@ function parseThailandPostMemoText(rawText, originalFileName) {
     if (existing) matchedServiceId = existing.id;
   }
   // 4. Domestic Services
-  else if (fullScan.includes('ems jumbo') || fullScan.includes('jumbo') || fullScan.includes('จัมโบ้') || fullScan.includes('logispost') || fullScan.includes('ชิ้นใหญ่')) {
+  else if (fullScan.includes('ems jumbo') || fullScan.includes('jumbo') || fullScan.includes('จัมโบ้') || fullScan.includes('logispost') || fullScan.includes('โลจิสต์โพสต์') || fullScan.includes('roll pallet') || fullScan.includes('พิกัดน้ำหนัก 30') || fullScan.includes('ชิ้นใหญ่') || fullScan.includes('เครื่องใช้ไฟฟ้า')) {
     detectedCategory = 'domestic';
-    const existing = state.services.find(s => (s.name || '').toLowerCase().includes('jumbo') || (s.name || '').toLowerCase().includes('logispost'));
+    const existing = state.services.find(s => s.service_group === 'emsjumbo' || (s.name || '').toLowerCase().includes('jumbo') || (s.name || '').toLowerCase().includes('logispost') || (s.name || '').includes('โลจิสต์โพสต์'));
     if (existing) matchedServiceId = existing.id;
   }
   else if (fullScan.includes('กล่อง') || fullScan.includes('ซอง') || fullScan.includes('หุ้มห่อ') || fullScan.includes('พัสดุหุ้มห่อ')) {
@@ -8906,6 +9030,56 @@ function setupEventListeners() {
   }
 
   // Move Memo / Document Modal Handlers
+  window.openMoveServiceModal = (serviceId) => {
+    const service = state.services.find(s => s.id === serviceId);
+    if (!service) return;
+
+    const sourceDisplay = document.getElementById('move-source-item-display');
+    const sourceServiceDisplay = document.getElementById('move-source-service-display');
+    const targetSelect = document.getElementById('move-target-service-id');
+
+    moveSourceServiceId.value = service.id;
+    moveSourceBlockId.value = '';
+    moveIsFullCard.value = 'true';
+
+    if (sourceDisplay) sourceDisplay.innerText = `การ์ด: ${service.name}`;
+    if (sourceServiceDisplay) sourceServiceDisplay.innerText = `หมวดปัจจุบัน: ${service.category_type || 'domestic'}`;
+
+    let optionsHtml = '<option value="">-- เลือกการ์ดปลายทาง --</option>';
+    state.services.filter(s => s.id !== serviceId).forEach(s => {
+      optionsHtml += `<option value="${s.id}">${s.name} (${s.category_type || 'domestic'})</option>`;
+    });
+    if (targetSelect) targetSelect.innerHTML = optionsHtml;
+
+    moveMemoModal.classList.add('active');
+    lucide.createIcons();
+  };
+
+  window.openMoveBlockModal = (serviceId, blockId, title) => {
+    const service = state.services.find(s => s.id === serviceId);
+    if (!service) return;
+
+    const sourceDisplay = document.getElementById('move-source-item-display');
+    const sourceServiceDisplay = document.getElementById('move-source-service-display');
+    const targetSelect = document.getElementById('move-target-service-id');
+
+    moveSourceServiceId.value = service.id;
+    moveSourceBlockId.value = blockId;
+    moveIsFullCard.value = 'false';
+
+    if (sourceDisplay) sourceDisplay.innerText = `📄 ไฟล์: ${title}`;
+    if (sourceServiceDisplay) sourceServiceDisplay.innerText = `อยู่ในการ์ด: ${service.name}`;
+
+    let optionsHtml = '<option value="">-- เลือกการ์ดปลายทางที่ต้องการย้ายไฟล์ไปใส่ --</option>';
+    state.services.filter(s => s.id !== serviceId).forEach(s => {
+      optionsHtml += `<option value="${s.id}">${s.name} (${s.category_type || 'domestic'})</option>`;
+    });
+    if (targetSelect) targetSelect.innerHTML = optionsHtml;
+
+    moveMemoModal.classList.add('active');
+    lucide.createIcons();
+  };
+
   if (detailBtnMove) {
     detailBtnMove.onclick = () => {
       if (state.activeService) {
