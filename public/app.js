@@ -3605,11 +3605,73 @@ let isTouchDragging = false;
 let touchTimer = null;
 
 function setupDragAndDropHandlers() {
-  if (!state.isAdmin) return;
+  const cards = document.querySelectorAll('.service-card');
+  const categoryTabs = document.querySelectorAll('#main-category-switcher .switcher-btn');
+  const sidebarCategoryItems = document.querySelectorAll('.category-item');
 
-  const cards = document.querySelectorAll('.service-card.is-draggable');
   cards.forEach(card => {
-    // Desktop Drag & Drop
+    // 1. Direct PDF Drag & Drop onto Service Card from Computer
+    card.ondragover = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const hasFiles = e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files');
+      if (hasFiles) {
+        e.dataTransfer.dropEffect = 'copy';
+        card.classList.add('drag-over-pdf');
+      } else if (state.isAdmin && draggedCardId && card.dataset.id !== draggedCardId) {
+        e.dataTransfer.dropEffect = 'move';
+        card.classList.add('drag-over');
+      }
+    };
+
+    card.ondragleave = (e) => {
+      e.preventDefault();
+      card.classList.remove('drag-over', 'drag-over-pdf');
+    };
+
+    card.ondrop = async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      card.classList.remove('drag-over', 'drag-over-pdf');
+
+      // If dropping PDF file from computer
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        const file = e.dataTransfer.files[0];
+        if (file.name.toLowerCase().endsWith('.pdf')) {
+          const targetServiceId = card.dataset.id;
+          const service = state.services.find(s => s.id === targetServiceId);
+          showToast(`📄 กำลังประมวลผลและนำเอกสาร ${file.name} เข้าสู่ "${service ? service.name : 'บริการ'}"...`, 'info');
+          
+          try {
+            const rawText = await extractTextFromPdf(file);
+            const extracted = parseThailandPostMemoText(rawText, file.name);
+            currentIngestedPdfData = {
+              file,
+              fileName: file.name,
+              ...extracted,
+              matchedServiceId: targetServiceId
+            };
+            openDiffConfirmationModal(currentIngestedPdfData);
+          } catch (err) {
+            console.error('PDF drop error:', err);
+            showToast('เกิดข้อผิดพลาดในการอ่านไฟล์ PDF', 'danger');
+          }
+          return;
+        }
+      }
+
+      // If dropping card to reorder
+      if (state.isAdmin && draggedCardId) {
+        const targetId = card.dataset.id;
+        if (targetId && draggedCardId !== targetId) {
+          await swapServiceItems(draggedCardId, targetId);
+        }
+      }
+    };
+
+    if (!state.isAdmin) return;
+
+    // Desktop Card Drag Start
     card.ondragstart = (e) => {
       draggedCardId = card.dataset.id;
       card.classList.add('is-dragging');
@@ -3617,32 +3679,11 @@ function setupDragAndDropHandlers() {
       e.dataTransfer.setData('text/plain', card.dataset.id);
     };
 
-    card.ondragover = (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      if (card.dataset.id !== draggedCardId) {
-        card.classList.add('drag-over');
-      }
-    };
-
-    card.ondragleave = () => {
-      card.classList.remove('drag-over');
-    };
-
-    card.ondrop = async (e) => {
-      e.preventDefault();
-      card.classList.remove('drag-over');
-      const targetId = card.dataset.id;
-      if (draggedCardId && targetId && draggedCardId !== targetId) {
-        await swapServiceItems(draggedCardId, targetId);
-      }
-    };
-
     card.ondragend = () => {
       cards.forEach(c => {
-        c.classList.remove('is-dragging');
-        c.classList.remove('drag-over');
+        c.classList.remove('is-dragging', 'drag-over', 'drag-over-pdf');
       });
+      categoryTabs.forEach(t => t.classList.remove('tab-drop-target'));
       draggedCardId = null;
     };
 
@@ -3658,6 +3699,7 @@ function setupDragAndDropHandlers() {
         isTouchDragging = true;
         card.classList.add('is-dragging');
         if (navigator.vibrate) navigator.vibrate(40);
+        showToast('🖐️ กำลังลากการ์ดบริการ - ลากไปปล่อยที่แท็บหมวดหมู่ด้านบน หรือสลับลำดับการ์ดได้เลยครับ', 'info');
       }, 250);
     };
 
@@ -3672,10 +3714,15 @@ function setupDragAndDropHandlers() {
       e.preventDefault();
       const touch = e.touches[0];
       const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
-      const targetCard = targetElement?.closest('.service-card.is-draggable');
-      
+      const targetCard = targetElement?.closest('.service-card');
+      const targetTab = targetElement?.closest('#main-category-switcher .switcher-btn');
+
       cards.forEach(c => c.classList.remove('drag-over'));
-      if (targetCard && targetCard.dataset.id !== draggedCardId) {
+      categoryTabs.forEach(t => t.classList.remove('tab-drop-target'));
+
+      if (targetTab) {
+        targetTab.classList.add('tab-drop-target');
+      } else if (targetCard && targetCard.dataset.id !== draggedCardId) {
         targetCard.classList.add('drag-over');
       }
     };
@@ -3686,14 +3733,18 @@ function setupDragAndDropHandlers() {
         e.preventDefault();
         const changedTouch = e.changedTouches[0];
         const targetElement = document.elementFromPoint(changedTouch.clientX, changedTouch.clientY);
-        const targetCard = targetElement?.closest('.service-card.is-draggable');
-        
-        cards.forEach(c => {
-          c.classList.remove('is-dragging');
-          c.classList.remove('drag-over');
-        });
+        const targetCard = targetElement?.closest('.service-card');
+        const targetTab = targetElement?.closest('#main-category-switcher .switcher-btn');
 
-        if (targetCard && targetCard.dataset.id && targetCard.dataset.id !== draggedCardId) {
+        cards.forEach(c => c.classList.remove('is-dragging', 'drag-over'));
+        categoryTabs.forEach(t => t.classList.remove('tab-drop-target'));
+
+        if (targetTab && draggedCardId) {
+          const targetCatType = targetTab.dataset.categoryType;
+          if (targetCatType && targetCatType !== 'all') {
+            await moveServiceToCategory(draggedCardId, targetCatType);
+          }
+        } else if (targetCard && targetCard.dataset.id && targetCard.dataset.id !== draggedCardId) {
           await swapServiceItems(draggedCardId, targetCard.dataset.id);
         }
         isTouchDragging = false;
@@ -3701,6 +3752,69 @@ function setupDragAndDropHandlers() {
       }
     };
   });
+
+  // 2. Allow dropping cards into Category Tabs above
+  if (state.isAdmin) {
+    categoryTabs.forEach(tab => {
+      tab.ondragover = (e) => {
+        if (!draggedCardId) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        tab.classList.add('tab-drop-target');
+      };
+
+      tab.ondragleave = () => {
+        tab.classList.remove('tab-drop-target');
+      };
+
+      tab.ondrop = async (e) => {
+        e.preventDefault();
+        tab.classList.remove('tab-drop-target');
+        const targetCatType = tab.dataset.categoryType;
+        if (draggedCardId && targetCatType && targetCatType !== 'all') {
+          await moveServiceToCategory(draggedCardId, targetCatType);
+        }
+      };
+    });
+  }
+}
+
+async function moveServiceToCategory(serviceId, targetCategoryType) {
+  const service = state.services.find(s => s.id === serviceId);
+  if (!service) return;
+
+  if (service.category_type === targetCategoryType) {
+    showToast(`ℹ️ บริการ "${service.name}" อยู่ในหมวดนี้อยู่แล้วครับ`, 'info');
+    return;
+  }
+
+  const oldCat = service.category_type;
+  service.category_type = targetCategoryType;
+
+  try {
+    if (!service.isLocalFallback) {
+      await updateDoc(doc(db, service.collectionName || 'categories', service.id), {
+        category_type: targetCategoryType,
+        updated_at: serverTimestamp()
+      });
+    }
+
+    const catLabels = {
+      domestic: '🇹🇭 ในประเทศ',
+      international: '🌐 ระหว่างประเทศ',
+      coldchain: '❄️ FUZE POST',
+      promotions: '🎁 โปรโมชั่น',
+      news: '📢 ศูนย์ข่าว'
+    };
+
+    showToast(`✨ ย้าย "${service.name}" ไปยังหมวด ${catLabels[targetCategoryType] || targetCategoryType} เรียบร้อยแล้ว!`, 'success');
+    renderSidebarList();
+    renderServicesView();
+  } catch (err) {
+    console.error('Error moving category:', err);
+    service.category_type = oldCat;
+    showToast('เกิดข้อผิดพลาดในการย้ายหมวดหมู่', 'danger');
+  }
 }
 
 async function swapServiceItems(sourceId, targetId) {

@@ -831,6 +831,35 @@ body {
   gap: 4px;
 }
 
+/* Drag & Drop Visual Effects */
+.service-card.is-dragging {
+  opacity: 0.35;
+  transform: scale(0.96);
+  border: 2px dashed #0071e3 !important;
+  box-shadow: 0 0 20px rgba(0, 113, 227, 0.4);
+}
+
+.service-card.drag-over {
+  background: rgba(0, 113, 227, 0.2) !important;
+  border: 2px solid #30d158 !important;
+  transform: scale(1.02);
+}
+
+.service-card.drag-over-pdf {
+  background: rgba(255, 214, 10, 0.15) !important;
+  border: 2px dashed #ffd60a !important;
+  transform: scale(1.03);
+  box-shadow: 0 0 24px rgba(255, 214, 10, 0.5) !important;
+}
+
+.switcher-btn.tab-drop-target {
+  background: rgba(48, 209, 88, 0.25) !important;
+  border: 2px solid #30d158 !important;
+  color: #30d158 !important;
+  transform: scale(1.08);
+  box-shadow: 0 0 16px rgba(48, 209, 88, 0.4) !important;
+}
+
 /* Modals */
 .modal-overlay {
   display: none;
