@@ -3914,7 +3914,7 @@ function updateNotificationCenter() {
       quickAlertBanner.innerHTML = `
         <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(255, 149, 0, 0.15); border: 1px solid rgba(255, 149, 0, 0.35); border-radius: var(--radius-md); gap: 10px; cursor: pointer;" onclick="window.navigateToServiceFromNotif('${topExpiring.service.id}')">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <i data-lucide="alert-triangle" style="color: #ff9500; width: 18px; height: 18px; flex-shrink: 0;"></i>
+            <i data-lucide="alert-triangle" style="color: #ff9500; width: 18px; height: 18px;"></i>
             <span style="font-size: 0.84rem; font-weight: 600; color: #ffb340;">
               ⚡ <strong>โปรโมชั่นใกล้หมดเขต:</strong> ${topExpiring.service.name} (${topExpiring.meta.label})
             </span>
@@ -5320,8 +5320,7 @@ function renderLegoEditorBlocks() {
 
   state.currentEditingBlocks.forEach((block, idx) => {
     const card = document.createElement('div');
-    card.className = 'lego-block-card is-draggable-block';
-    card.draggable = true;
+    card.className = 'lego-block-card';
     card.dataset.blockIdx = idx;
 
     let typeLabel = 'บล็อกข้อมูล';
@@ -5498,15 +5497,28 @@ function saveCurrentEditorStateToMemory() {
 }
 
 function setupLegoBlockDragAndDrop() {
-  const cards = document.querySelectorAll('.lego-block-card.is-draggable-block');
+  const cards = document.querySelectorAll('.lego-block-card');
   cards.forEach(card => {
-    // Desktop Drag & Drop
-    card.ondragstart = (e) => {
+    const handle = card.querySelector('.lego-drag-handle');
+    if (!handle) return;
+
+    handle.draggable = true;
+
+    // Desktop Drag on Handle Only
+    handle.ondragstart = (e) => {
       saveCurrentEditorStateToMemory();
       draggedBlockIdx = parseInt(card.dataset.blockIdx, 10);
       card.classList.add('is-dragging-block');
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/plain', card.dataset.blockIdx);
+    };
+
+    handle.ondragend = () => {
+      cards.forEach(c => {
+        c.classList.remove('is-dragging-block');
+        c.classList.remove('drag-over-block');
+      });
+      draggedBlockIdx = null;
     };
 
     card.ondragover = (e) => {
@@ -5531,19 +5543,8 @@ function setupLegoBlockDragAndDrop() {
       }
     };
 
-    card.ondragend = () => {
-      cards.forEach(c => {
-        c.classList.remove('is-dragging-block');
-        c.classList.remove('drag-over-block');
-      });
-      draggedBlockIdx = null;
-    };
-
-    // Mobile Touch & Hold Long-Press Drag
-    card.ontouchstart = (e) => {
-      const isInput = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON';
-      if (isInput) return;
-
+    // Mobile Touch on Handle
+    handle.ontouchstart = (e) => {
       const touch = e.touches[0];
       touchBlockStartX = touch.clientX;
       touchBlockStartY = touch.clientY;
@@ -5555,11 +5556,10 @@ function setupLegoBlockDragAndDrop() {
         isTouchBlockDragging = true;
         card.classList.add('is-dragging-block');
         if (navigator.vibrate) navigator.vibrate(40);
-        showToast('🖐️ กำลังลากบล็อกข้อมูล - เลื่อนขึ้นหรือลงเพื่อเปลี่ยนตำแหน่งได้เลยครับ', 'info');
-      }, 200);
+      }, 150);
     };
 
-    card.ontouchmove = (e) => {
+    handle.ontouchmove = (e) => {
       if (!isTouchBlockDragging) {
         const touch = e.touches[0];
         if (Math.abs(touch.clientX - touchBlockStartX) > 10 || Math.abs(touch.clientY - touchBlockStartY) > 10) {
@@ -5570,7 +5570,7 @@ function setupLegoBlockDragAndDrop() {
       e.preventDefault();
       const touch = e.touches[0];
       const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
-      const targetCard = targetElement?.closest('.lego-block-card.is-draggable-block');
+      const targetCard = targetElement?.closest('.lego-block-card');
       
       cards.forEach(c => c.classList.remove('drag-over-block'));
       if (targetCard && parseInt(targetCard.dataset.blockIdx, 10) !== draggedBlockIdx) {
@@ -5578,28 +5578,26 @@ function setupLegoBlockDragAndDrop() {
       }
     };
 
-    card.ontouchend = (e) => {
+    handle.ontouchend = (e) => {
       clearTimeout(touchBlockTimer);
-      if (isTouchBlockDragging) {
-        e.preventDefault();
-        const changedTouch = e.changedTouches[0];
-        const targetElement = document.elementFromPoint(changedTouch.clientX, changedTouch.clientY);
-        const targetCard = targetElement?.closest('.lego-block-card.is-draggable-block');
-        
-        cards.forEach(c => {
-          c.classList.remove('is-dragging-block');
-          c.classList.remove('drag-over-block');
-        });
+      if (!isTouchBlockDragging) return;
 
-        if (targetCard && targetCard.dataset.blockIdx !== undefined) {
-          const targetIdx = parseInt(targetCard.dataset.blockIdx, 10);
-          if (targetIdx !== draggedBlockIdx) {
-            swapLegoBlocks(draggedBlockIdx, targetIdx);
-          }
+      isTouchBlockDragging = false;
+      card.classList.remove('is-dragging-block');
+
+      const touch = e.changedTouches[0];
+      const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+      const targetCard = targetElement?.closest('.lego-block-card');
+
+      cards.forEach(c => c.classList.remove('drag-over-block'));
+
+      if (targetCard) {
+        const targetIdx = parseInt(targetCard.dataset.blockIdx, 10);
+        if (draggedBlockIdx !== null && targetIdx !== null && draggedBlockIdx !== targetIdx) {
+          swapLegoBlocks(draggedBlockIdx, targetIdx);
         }
-        setTimeout(() => { isTouchBlockDragging = false; }, 100);
-        draggedBlockIdx = null;
       }
+      draggedBlockIdx = null;
     };
   });
 }
