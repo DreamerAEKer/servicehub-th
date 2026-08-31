@@ -3343,10 +3343,25 @@ function normalizeService(raw, id, collectionName = 'categories') {
     }
   }
 
+  let serviceGroup = raw.service_group || preset.service_group || '';
+  if (!serviceGroup) {
+    if (id.includes('mail-1') || nameLower.includes('จดหมาย')) serviceGroup = 'letter';
+    else if (id.includes('printed') || nameLower.includes('สิ่งตีพิมพ์')) serviceGroup = 'printed_matter';
+    else if (id.includes('parcel') || nameLower.includes('พัสดุ')) serviceGroup = 'parcel';
+    else if (id.includes('mail-2') || nameLower.includes('ลงทะเบียน')) serviceGroup = 'registered';
+    else if (id.includes('eco-post') || nameLower.includes('eco-post')) serviceGroup = 'ecopost';
+    else if (id.includes('epacket') || nameLower.includes('epacket')) serviceGroup = 'epacket';
+    else if (id.includes('mail-3') || id.includes('ems-world') || nameLower.includes('ems')) serviceGroup = 'ems';
+    else if (id.includes('courier') || nameLower.includes('courier')) serviceGroup = 'courierpost';
+    else if (id.includes('admail') || nameLower.includes('advertis')) serviceGroup = 'admail';
+    else if (id.includes('travel-lite') || nameLower.includes('travel')) serviceGroup = 'travellite';
+  }
+
   return {
     id: id,
     collectionName: collectionName,
     name: raw.name || raw.title || 'บริการไปรษณีย์',
+    service_group: serviceGroup,
     category_type: catType,
     start_date: startDate,
     end_date: endDate,
@@ -3420,6 +3435,7 @@ async function loadAllServices() {
       }
       match.color = '#30d158';
       match.name = dom.name;
+      match.service_group = dom.service_group || match.service_group;
     }
   });
 
@@ -3459,6 +3475,7 @@ async function loadAllServices() {
       }
       match.name = intl.name;
       match.color = intl.color;
+      match.service_group = intl.service_group || match.service_group;
     }
   });
 
@@ -4801,10 +4818,10 @@ window.toggleDualPaneCollapse = (mode) => {
   if (!container) return;
   
   container.classList.remove('collapse-domestic', 'collapse-intl');
-  if (mode === 'domestic-only') {
-    container.classList.add('collapse-intl');
-  } else if (mode === 'intl-only') {
-    container.classList.add('collapse-domestic');
+  if (mode === 'domestic-fullscreen') {
+    container.classList.add('collapse-intl'); // hide international, show domestic
+  } else if (mode === 'intl-fullscreen') {
+    container.classList.add('collapse-domestic'); // hide domestic, show international
   }
 
   document.querySelectorAll('.pane-toggle-btn').forEach(btn => {
@@ -5095,13 +5112,13 @@ window.openServiceDetail = (id) => {
     // Control Bar with 3 Side Toggles
     contentHtml += `
       <div class="dual-pane-control-bar">
-        <button type="button" class="pane-toggle-btn" data-mode="intl-only" onclick="window.toggleDualPaneCollapse('intl-only')">
+        <button type="button" class="pane-toggle-btn" data-mode="domestic-fullscreen" onclick="window.toggleDualPaneCollapse('domestic-fullscreen')">
           <i data-lucide="arrow-left" style="width: 13px; height: 13px;"></i> ดูในประเทศเต็มจอ
         </button>
         <button type="button" class="pane-toggle-btn active" data-mode="both" onclick="window.toggleDualPaneCollapse('both')">
           <i data-lucide="columns" style="width: 13px; height: 13px;"></i> แสดง 2 ฝั่งคู่กัน
         </button>
-        <button type="button" class="pane-toggle-btn" data-mode="domestic-only" onclick="window.toggleDualPaneCollapse('domestic-only')">
+        <button type="button" class="pane-toggle-btn" data-mode="intl-fullscreen" onclick="window.toggleDualPaneCollapse('intl-fullscreen')">
           ดูต่างประเทศเต็มจอ <i data-lucide="arrow-right" style="width: 13px; height: 13px;"></i>
         </button>
       </div>
