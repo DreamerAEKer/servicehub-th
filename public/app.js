@@ -24,6 +24,7 @@ import {
   getDownloadURL
 } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js';
 
+const APP_VERSION = 'v140.1';
 const DEFAULT_ADMIN_PIN = '10501';
 const DEFAULT_RECOVERY_KEY = 'Gpo10501';
 const REGISTERED_ADMIN_EMAIL = 'pnk10501@gmail.com';
@@ -2112,8 +2113,6 @@ const versionHistoryList = document.getElementById('version-history-list');
 const historyModalSubtitle = document.getElementById('history-modal-subtitle');
 
 let currentIngestedPdfData = null;
-
-const APP_VERSION = 'v139.0';
 let cloudAdminPin = null;
 
 // ==========================================================================
