@@ -4343,9 +4343,7 @@ function renderSidebarList() {
     state.services : 
     state.services.filter(s => s.active !== false);
 
-  const currentServices = state.selectedMainCategory === 'all' ? 
-    visibleServices : 
-    visibleServices.filter(s => s.category_type === state.selectedMainCategory);
+  const currentServices = getDisplayServices(visibleServices, state.selectedMainCategory);
 
   const itemsHtml = currentServices.map(s => {
     const isActive = state.selectedCategory === s.id ? 'active' : '';
@@ -4435,9 +4433,7 @@ function renderServicesView() {
   if (countPromoEl) countPromoEl.innerText = `(${promoCount})`;
   if (countNewsEl) countNewsEl.innerText = `(${newsCount})`;
 
-  let filtered = state.selectedMainCategory === 'all' ? 
-    [...visibleServices] : 
-    visibleServices.filter(s => s.category_type === state.selectedMainCategory);
+  let filtered = getDisplayServices(visibleServices, state.selectedMainCategory);
 
   if (currentViewTitle) {
     if (state.selectedMainCategory === 'promotions') {
@@ -4464,21 +4460,72 @@ function renderServicesView() {
     filtered = filtered.filter(s => s.id === state.selectedCategory);
   }
 
-function getCategoryThemeColor(categoryType) {
-  switch (categoryType) {
-    case 'domestic':
-      return '#30d158'; // 🟢 สีเขียวมรกตสดชื่น (บริการในประเทศ)
-    case 'international':
-      return '#0a84ff'; // 🔵 สีน้ำเงินสากล / Par Avion (บริการระหว่างประเทศ)
-    case 'coldchain':
-      return '#64d2ff'; // 🧊 สีฟ้าไอซ์บลู (FUZE POST แช่เย็น/แช่แข็ง)
-    case 'promotions':
-      return '#ffd60a'; // 🟡 สีเหลืองทอง (โปรโมชั่น & ส่วนลด)
-    case 'news':
-      return '#ff9500'; // 🟠 สีส้มแสด (ศูนย์ข่าว & ประกาศ)
-    default:
-      return '#30d158';
+const PILLAR_SERVICES_ORDER = [
+  { group: 'letter', name: '✉️ จดหมาย', icon: 'mail', color: '#0071e3', summary: 'ส่งจดหมาย เอกสาร และไปรษณียบัตร (ทั้งในประเทศ และ ระหว่างประเทศ)' },
+  { group: 'printed_matter', name: '📚 สิ่งตีพิมพ์', icon: 'book-open', color: '#0071e3', summary: 'ส่งหนังสือ สิ่งพิมพ์ วารสาร แคตตาล็อก (ทั้งในประเทศ และ ระหว่างประเทศ)' },
+  { group: 'parcel', name: '📦 พัสดุ', icon: 'package', color: '#30d158', summary: 'ส่งพัสดุสิ่งของทั่วไป และขนาดใหญ่ (ทั้งในประเทศ และ ระหว่างประเทศ)' },
+  { group: 'registered', name: '📝 ลงทะเบียน', icon: 'file-text', color: '#30d158', summary: 'มีหลักฐานการรับฝากและเซ็นรับ (ทั้งในประเทศ และ ระหว่างประเทศ)' },
+  { group: 'ecopost', name: '🚛 eCo-Post', icon: 'truck', color: '#0071e3', summary: 'ส่งแบบประหยัดสายพันธุ์ใหม่ หนักได้ถึง 10 กก. คุ้มครอง 1,500 บ.' },
+  { group: 'epacket', name: '🌐 ePacket', icon: 'send', color: '#0071e3', summary: 'สุดคุ้มสำหรับ e-Commerce ข้ามพรมแดน ชิ้นเล็กส่งไปทั่วโลก' },
+  { group: 'ems', name: '⚡ EMS', icon: 'zap', color: '#ff9500', summary: 'ส่งด่วนพิเศษมาตรฐานสูงสุด (ทั้งในประเทศ และ ระหว่างประเทศ)' },
+  { group: 'courierpost', name: '✈️ Courier Post', icon: 'plane', color: '#ff453a', summary: 'ส่งด่วนพรีเมียมถึงมือผู้รับใน 2-4 วัน ร่วมกับ DHL Express' },
+  { group: 'admail', name: '📰 Advertising Mail', icon: 'newspaper', color: '#30d158', summary: 'สื่อโฆษณา แผ่นพับ ใบปลิว ปูพรมถึงบ้านผู้รับตามพื้นที่' },
+  { group: 'travellite', name: '🧳 Travel Lite', icon: 'briefcase', color: '#30d158', summary: 'ส่งกระเป๋าเดินทางและสัมภาระท่องเที่ยว ตรงถึงโรงแรม/สนามบิน' }
+];
+
+function getDisplayServices(allServices, selectedMainCat) {
+  // If viewing specific sub-categories (coldchain, promotions, news)
+  if (selectedMainCat === 'coldchain' || selectedMainCat === 'promotions' || selectedMainCat === 'news') {
+    return allServices.filter(s => s.category_type === selectedMainCat);
   }
+
+  // If viewing 'domestic' or 'international' specifically
+  if (selectedMainCat === 'domestic' || selectedMainCat === 'international') {
+    return allServices.filter(s => s.category_type === selectedMainCat);
+  }
+
+  // When viewing "All" (ทั้งหมด) -> Aggregate into Clean 10 Pillar Services + Extra Custom Cards
+  const pillarCards = [];
+  const handledServiceIds = new Set();
+
+  PILLAR_SERVICES_ORDER.forEach((pillar, pIdx) => {
+    const matchingServices = allServices.filter(s => s.service_group === pillar.group);
+    if (matchingServices.length > 0) {
+      const primary = matchingServices.find(s => s.category_type === 'domestic') || matchingServices[0];
+      const hasDom = matchingServices.some(s => s.category_type === 'domestic');
+      const hasIntl = matchingServices.some(s => s.category_type === 'international');
+
+      matchingServices.forEach(s => handledServiceIds.add(s.id));
+
+      let scopeLabel = '🇹🇭 ในประเทศ';
+      if (hasDom && hasIntl) scopeLabel = '🇹🇭 ในประเทศ & 🌐 ระหว่างประเทศ';
+      else if (hasIntl) scopeLabel = '🌐 ระหว่างประเทศ';
+
+      pillarCards.push({
+        id: primary.id,
+        name: pillar.name,
+        service_group: pillar.group,
+        category_type: hasDom && hasIntl ? 'dual' : primary.category_type,
+        scopeLabel: scopeLabel,
+        color: pillar.color,
+        icon: pillar.icon,
+        summary: pillar.summary,
+        specs: primary.specs || {},
+        blocks: primary.blocks || [],
+        order: pIdx + 1,
+        active: primary.active !== false
+      });
+    }
+  });
+
+  // Include non-pillar services (e.g. FUZE POST, Promotions, News, Custom Added Services)
+  allServices.forEach(s => {
+    if (!handledServiceIds.has(s.id)) {
+      pillarCards.push(s);
+    }
+  });
+
+  return pillarCards;
 }
 
 function matchesDeepSearch(service, query) {
@@ -4645,14 +4692,16 @@ function matchesDeepSearch(service, query) {
     }
 
     servicesGrid.innerHTML = filtered.map(s => {
-      const color = getCategoryThemeColor(s.category_type);
+      const color = s.category_type === 'dual' ? '#0071e3' : getCategoryThemeColor(s.category_type);
       const icon = s.icon || 'package';
       const blocksCount = s.blocks ? s.blocks.length : 0;
-      let badgeType = '🇹🇭 ในประเทศ';
-      if (s.category_type === 'promotions') badgeType = '🎁 โปรโมชั่น';
-      else if (s.category_type === 'news') badgeType = '📢 ประกาศข่าว';
-      else if (s.category_type === 'coldchain') badgeType = '❄️ FUZE POST';
-      else if (s.category_type === 'international') badgeType = '🌐 ระหว่างประเทศ';
+      let badgeType = s.scopeLabel || '🇹🇭 ในประเทศ';
+      if (!s.scopeLabel) {
+        if (s.category_type === 'promotions') badgeType = '🎁 โปรโมชั่น';
+        else if (s.category_type === 'news') badgeType = '📢 ประกาศข่าว';
+        else if (s.category_type === 'coldchain') badgeType = '❄️ FUZE POST';
+        else if (s.category_type === 'international') badgeType = '🌐 ระหว่างประเทศ';
+      }
 
       const specs = s.specs || {};
       const promoMeta = calculatePromoStatus(s.start_date, s.end_date);
@@ -4667,10 +4716,10 @@ function matchesDeepSearch(service, query) {
       const sIdLow = (s.id || '').toLowerCase();
       if (sIdLow.includes('ems-jumbo') || sNameLow.includes('jumbo')) matchedPosCode = 'POS 2886';
       else if (sIdLow.includes('eco-post') || sNameLow.includes('eco-post')) matchedPosCode = 'POS 919';
-      else if (sIdLow.includes('domestic-mail-3') || sNameLow.includes('ems ในประเทศ')) matchedPosCode = 'POS 831';
+      else if (sIdLow.includes('domestic-mail-3') || sNameLow.includes('ems')) matchedPosCode = 'POS 831';
       else if (sIdLow.includes('domestic-parcel') || sNameLow.includes('พัสดุ')) matchedPosCode = 'POS 4';
       else if (sIdLow.includes('domestic-mail-2') || sNameLow.includes('ลงทะเบียน')) matchedPosCode = 'POS 2005';
-      else if (sIdLow.includes('domestic-mail-1') || sNameLow.includes('ธรรมดา')) matchedPosCode = 'POS 6 / 30';
+      else if (sIdLow.includes('domestic-mail-1') || sNameLow.includes('จดหมาย')) matchedPosCode = 'POS 6 / 30';
       else if (sIdLow.includes('boxes-packaging') || sNameLow.includes('กล่อง')) matchedPosCode = 'POS กล่อง/ซอง';
       else if (sIdLow.includes('travel-lite') || sNameLow.includes('travel lite')) matchedPosCode = 'POS 2470';
       else if (sIdLow.includes('fuze') || sNameLow.includes('fuze')) matchedPosCode = 'FUZE POST';
