@@ -1,0 +1,1742 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Postal Service & Operation Hub - ศูนย์ข้อมูลบริการและวิธีปฏิบัติงาน</title>
+  <!-- Google Fonts: Sarabun + Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- PDF.js Library for Client-side PDF Reading & CMap support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <!-- Tesseract.js for Scanned / Image PDF Thai OCR -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
+  <!-- Apple HIG CSS with Cache Buster -->
+  <link rel="stylesheet" href="style.css?v=29.0">
+</head>
+<body>
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="app-sidebar">
+      <div class="sidebar-header">
+        <div class="logo" id="app-logo-btn" title="Service Hub" style="cursor: pointer; user-select: none;">
+          <div class="logo-badge">
+            <i data-lucide="package" class="logo-icon"></i>
+          </div>
+          <div class="logo-text">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <h1>Service Hub</h1>
+              <span style="font-size: 0.68rem; font-weight: 700; background: rgba(100, 210, 255, 0.15); color: #64d2ff; border: 1px solid rgba(100, 210, 255, 0.35); padding: 1px 6px; border-radius: var(--radius-pill);" id="sidebar-app-version">v140.0</span>
+            </div>
+            <p>ศูนย์ข้อมูลรับฝาก & SOP</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Categories Navigation -->
+      <div class="sidebar-section-title">
+        <span>รายการบริการ</span>
+        <!-- Visible only to Admin -->
+        <button class="btn-icon admin-only-btn" id="btn-add-category" title="สร้างบริการใหม่" style="width: 22px; height: 22px; display: none;">
+          <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+        </button>
+      </div>
+
+      <ul class="category-list" id="category-filter-list">
+        <!-- Dynamically Populated -->
+      </ul>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <!-- Staff Note Button (Always Available to Staff) -->
+        <button class="btn btn-secondary" id="btn-open-staff-note" style="width: 100%; margin-bottom: 4px; color: var(--apple-teal); border-color: rgba(100, 210, 255, 0.3);">
+          <i data-lucide="message-square-plus" style="color: var(--apple-teal);"></i> ส่งโน้ต/เสนอแนะถึง Admin
+        </button>
+
+        <!-- Admin Management Panel (Grouped cleanly when Admin is logged in) -->
+        <div class="admin-only-btn" style="display: none; border-top: 1px solid var(--border-subtle); padding-top: 10px; margin-top: 6px;">
+          <div style="font-size: 0.7rem; font-weight: 700; color: var(--apple-mint); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 4px;">
+            <i data-lucide="shield-check" style="width: 13px; height: 13px;"></i> จัดการระบบ ADMIN
+          </div>
+          <button class="btn btn-secondary" id="btn-open-inbox" style="width: 100%; margin-bottom: 6px; color: #ffd60a; font-size: 0.8rem;">
+            <i data-lucide="inbox" style="color: #ffd60a; width: 14px; height: 14px;"></i> กล่องรับข้อความ <span class="badge-count" id="inbox-count-badge">0</span>
+          </button>
+          <button class="btn btn-secondary" id="btn-manage-categories" style="width: 100%; margin-bottom: 6px; font-size: 0.8rem;">
+            <i data-lucide="sliders" style="width: 14px; height: 14px;"></i> จัดการหมวดหมู่
+          </button>
+          <button class="btn btn-secondary" id="btn-open-change-pin" style="width: 100%; margin-bottom: 6px; font-size: 0.8rem;">
+            <i data-lucide="key-round" style="width: 14px; height: 14px;"></i> เปลี่ยนรหัสผ่าน PIN
+          </button>
+          <button class="btn btn-secondary" id="btn-open-data-migration" style="width: 100%; margin-bottom: 6px; font-size: 0.8rem; color: #ffd60a; border-color: rgba(255, 214, 10, 0.35); background: rgba(255, 214, 10, 0.08);">
+            <i data-lucide="arrow-right-left" style="width: 14px; height: 14px; color: #ffd60a;"></i> 🔄 โอนย้าย Drive & สำรองข้อมูล
+          </button>
+          <a href="https://drive.google.com/drive/folders/1zIKsjC6ldpxVdxTK5ofwE358YJUkmthG?authuser=pnk10501@gmail.com" target="_blank" rel="noreferrer noopener" class="btn btn-secondary" style="width: 100%; margin-bottom: 6px; font-size: 0.8rem; color: #64d2ff; border-color: rgba(100, 210, 255, 0.35); text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <i data-lucide="folder-symlink" style="width: 14px; height: 14px; color: #64d2ff;"></i> 📁 เปิด Google Drive ปณท (pnk10501)
+          </a>
+          <button class="btn btn-secondary" id="btn-admin-logout" style="width: 100%; font-size: 0.78rem; color: var(--apple-red); border-color: rgba(255, 69, 58, 0.3); background: rgba(255, 69, 58, 0.08);">
+            <i data-lucide="log-out" style="width: 14px; height: 14px;"></i> ออกจากระบบ Admin
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+      <!-- Top Navigation Bar -->
+      <header class="top-toolbar">
+        <div class="toolbar-row">
+          <button class="mobile-menu-btn" id="btn-mobile-menu" aria-label="Open Menu" title="เมนู">
+            <i data-lucide="menu" style="width: 18px; height: 18px;"></i>
+          </button>
+
+          <div class="search-container">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" id="search-input" class="search-input" placeholder="🔍 ค้นหาลึก: ชื่อบริการ, SOP, คำสั่ง, ตารางราคา, HS Code, PDF...">
+            <button class="search-clear" id="btn-search-clear">
+              <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+            </button>
+          </div>
+
+          <!-- Notification Bell Button -->
+          <button class="notif-bell-btn" id="btn-open-notifications" title="การแจ้งเตือน & โปรโมชั่นใกล้หมดเขต">
+            <i data-lucide="bell" style="width: 18px; height: 18px;"></i>
+            <span class="notif-pulse-dot" id="notif-indicator" style="display: none;"></span>
+          </button>
+
+          <!-- Top Bar Admin Status Indicator (Visible on Mobile & Desktop when logged in) -->
+          <button class="btn admin-only-btn" id="btn-admin-status-top" style="display: none; background: rgba(48, 209, 88, 0.15); color: var(--apple-mint); border: 1px solid rgba(48, 209, 88, 0.4); font-size: 0.74rem; font-weight: 700; padding: 4px 9px; border-radius: var(--radius-pill); flex-shrink: 0;" title="กำลังใช้งานในโหมด Admin (คลิกเพื่อออกจากระบบ)">
+            <i data-lucide="shield-check" style="width: 13px; height: 13px; color: var(--apple-mint);"></i>
+            <span>👑 ADMIN</span>
+          </button>
+
+          <!-- Top Bar Admin Login Trigger (Discreet Key icon when not logged in) -->
+          <button class="btn-icon" id="btn-open-admin-login-top" style="display: inline-flex;" title="เข้าสู่ระบบ Admin">
+            <i data-lucide="key-round" style="width: 15px; height: 15px; color: var(--text-tertiary);"></i>
+          </button>
+
+          <!-- Calendar Button in Top Bar -->
+          <button class="btn btn-secondary" id="btn-open-calendar-top" title="ปฏิทินแผนก วันหยุด และคนลาพักร้อน" style="color: #64d2ff; border-color: rgba(100, 210, 255, 0.35); background: rgba(100, 210, 255, 0.08);">
+            <i data-lucide="calendar" style="color: #64d2ff; width: 17px; height: 17px;"></i> <span class="btn-text" style="color: #64d2ff;">ปฏิทิน</span>
+          </button>
+
+          <!-- Rates Table Button in Top Bar -->
+          <button class="btn btn-secondary" id="btn-open-rates-top" title="อัตราค่าบริการและราคาพัสดุหุ้มห่อ">
+            <i data-lucide="badge-percent"></i> <span class="btn-text">ตารางราคา & ค่ากล่อง</span>
+          </button>
+
+          <!-- Smart PDF Ingestion Button in Top Bar (Admin Only) -->
+          <button class="btn btn-secondary admin-only-btn" id="btn-open-pdf-ingest-top" title="นำเข้าและวิเคราะห์เอกสาร PDF อัจฉริยะ" style="color: #ffd60a; border-color: rgba(255, 214, 10, 0.4); background: rgba(255, 214, 10, 0.1); display: none;">
+            <i data-lucide="sparkles" style="color: #ffd60a; width: 17px; height: 17px;"></i> <span class="btn-text" style="color: #ffd60a; font-weight: 700;">นำเข้า PDF</span>
+          </button>
+
+          <!-- Add Service (Admin Only) -->
+          <button class="btn btn-primary admin-only-btn" id="btn-open-create" style="display: none;">
+            <i data-lucide="plus"></i> <span class="btn-text">เพิ่มบริการ</span>
+          </button>
+        </div>
+
+        <!-- Row 2: Clean Category Switcher & View Mode Toggle (Zero Duplicates!) -->
+        <div class="toolbar-row pills-scroll" style="padding-top: 2px;">
+          <div class="main-category-switcher" id="main-category-switcher">
+            <button class="switcher-btn active" data-category-type="all">
+              <i data-lucide="layout-grid"></i> ทั้งหมด <span class="badge-count" id="count-all"></span>
+            </button>
+            <button class="switcher-btn" data-category-type="domestic">
+              <i data-lucide="map-pin"></i> ในประเทศ <span class="badge-count" id="count-domestic"></span>
+            </button>
+            <button class="switcher-btn" data-category-type="international">
+              <i data-lucide="globe"></i> ระหว่างประเทศ <span class="badge-count" id="count-intl"></span>
+            </button>
+            <button class="switcher-btn" data-category-type="coldchain">
+              <i data-lucide="snowflake" style="color: #64d2ff;"></i> FUZE POST <span class="badge-count" id="count-cold"></span>
+            </button>
+            <button class="switcher-btn" data-category-type="promotions" style="color: #ffd60a;">
+              <i data-lucide="gift" style="color: #ffd60a;"></i> โปรโมชั่น & ส่วนลด <span class="badge-count" id="count-promos"></span>
+            </button>
+            <button class="switcher-btn" data-category-type="news" style="color: #ff9f0a;">
+              <i data-lucide="megaphone" style="color: #ff9f0a;"></i> ศูนย์ข่าว & ประกาศ <span class="badge-count" id="count-news"></span>
+            </button>
+          </div>
+
+          <div class="view-mode-toggle" id="view-mode-toggle" style="margin-left: auto;">
+            <button class="toggle-btn active" data-view-mode="grid" title="แสดงแบบการ์ด">
+              <i data-lucide="grid"></i>
+            </button>
+            <button class="toggle-btn" data-view-mode="table" title="แสดงแบบตาราง">
+              <i data-lucide="table"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Scrollable Body -->
+      <section class="content-body">
+        <div class="section-top-bar">
+          <h2 id="current-view-title">รายการบริการทั้งหมด</h2>
+          <span class="meta-pill" id="total-count-pill">0 รายการ</span>
+        </div>
+
+        <!-- Dynamic Announcement / Notification Banner -->
+        <div id="quick-alert-banner" style="display: none; margin-bottom: 12px;"></div>
+
+        <!-- Service Cards Grid View -->
+        <div class="services-grid" id="services-grid">
+          <!-- Dynamic Content Rendered by app.js -->
+        </div>
+
+        <!-- Service Directory Table View -->
+        <div class="services-table-view-container" id="services-table-container" style="display: none;">
+          <div class="specs-table-container">
+            <table class="specs-table" id="services-main-table">
+              <thead>
+                <tr style="background: rgba(255,255,255,0.06);">
+                  <th style="width: 22%;">ชื่อบริการ / ข่าว</th>
+                  <th style="width: 14%;">หมวด</th>
+                  <th style="width: 18%;">พิกัด / วันที่</th>
+                  <th style="width: 16%;">สถานะ / ขนาด</th>
+                  <th style="width: 14%;">เวลานำจ่าย</th>
+                  <th style="width: 16%;">อัตราค่าบริการ</th>
+                </tr>
+              </thead>
+              <tbody id="services-table-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Staff Note & Feedback Modal (สำหรับพนักงานทุกคน) -->
+  <div class="modal-overlay" id="staff-note-modal">
+    <div class="modal-sheet" style="max-width: 520px;">
+      <div class="modal-sheet-header">
+        <div class="modal-title-group">
+          <div class="modal-title-icon" style="background: linear-gradient(135deg, var(--apple-teal), var(--apple-blue));">
+            <i data-lucide="message-square-plus"></i>
+          </div>
+          <div class="modal-title-text">
+            <h2>📝 ส่งโน้ต / ติงเรื่องข้อมูลถึง Admin</h2>
+            <p>แจ้งข้อผิดพลาด เสนอแนะโปรโมชั่น หรือขอปรับปรุงข้อมูลบริการ</p>
+          </div>
+        </div>
+        <button class="btn-icon" id="btn-close-staff-note">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-sheet-body">
+        <form id="staff-note-form">
+          <div class="form-group">
+            <label class="form-label" for="staff-note-topic">เรื่องที่ต้องการแจ้ง *</label>
+            <select id="staff-note-topic" class="form-select" required>
+              <option value="แจ้งราคาหรือข้อมูลไม่ถูกต้อง">⚠️ แจ้งราคาหรือข้อมูลไม่ถูกต้อง</option>
+              <option value="เสนอแนะเพิ่มโปรโมชั่นใหม่">🎁 เสนอแนะเพิ่มโปรโมชั่น / ส่วนลดใหม่</option>
+              <option value="แจ้งระเบียบ/คำสั่งใหม่">📜 แจ้งระเบียบ / คำสั่งใหม่</option>
+              <option value="เสนอแนะวิธีปฏิบัติงาน SOP">🔢 เสนอแนะขั้นตอน SOP</option>
+              <option value="ข้อเสนอแนะทั่วไป">💡 ข้อเสนอแนะทั่วไป</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="staff-note-service">เกี่ยวกับบริการใด (ระบุชื่อบริการหรือเลือก)</label>
+            <input type="text" id="staff-note-service" class="form-control" placeholder="เช่น EMS ในประเทศ, จดหมายหีบห่อ, FUZE POST...">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="staff-note-detail">รายละเอียดข้อความ / ข้อติง *</label>
+            <textarea id="staff-note-detail" class="form-control" rows="4" placeholder="พิมพ์ข้อความที่ต้องการแจ้ง เช่น “ขอให้เพิ่มอัตราค่าบริการลงทะเบียนหีบห่อ 500g ครับ”" required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="staff-note-sender">ชื่อผู้แจ้ง / ที่ทำการไปรษณีย์ (ไม่บังคับ)</label>
+            <input type="text" id="staff-note-sender" class="form-control" placeholder="เช่น พนง. เคาน์เตอร์ ปณ. บางพลี">
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px;">
+            <button type="button" class="btn btn-secondary" id="btn-cancel-staff-note">ยกเลิก</button>
+            <button type="submit" class="btn btn-primary" id="btn-submit-staff-note">
+              <i data-lucide="send"></i> ส่งโน้ตถึง Admin
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Staff Notes Inbox Modal (สำหรับ Admin เปิดดู) -->
+  <div class="modal-overlay" id="admin-inbox-modal">
+    <div class="modal-sheet" style="max-width: 680px;">
+      <div class="modal-sheet-header">
+        <div class="modal-title-group">
+          <div class="modal-title-icon" style="background: linear-gradient(135deg, #ffd60a, #ff9500);">
+            <i data-lucide="inbox"></i>
+          </div>
+          <div class="modal-title-text">
+            <h2>📬 กล่องรับโน้ต & ข้อเสนอแนะจากพนักงาน (Admin Only)</h2>
+            <p>รายการที่พนักงานแจ้งติงหรือเสนอแนะเพื่อรอ Admin อนุมัติ/ปรับปรุง</p>
+          </div>
+        </div>
+        <button class="btn-icon" id="btn-close-inbox">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-sheet-body" id="admin-inbox-body">
+        <!-- Dynamically populated -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Center Modal -->
+  <div class="modal-overlay" id="notif-modal">
+    <div class="modal-sheet" style="max-width: 600px;">
+      <div class="modal-sheet-header">
+        <div class="modal-title-group">
+          <div class="modal-title-icon" style="background: linear-gradient(135deg, var(--apple-red), var(--apple-orange));">
+            <i data-lucide="bell"></i>
+          </div>
+          <div class="modal-title-text">
+            <h2>🔔 ศูนย์แจ้งเตือน & อัปเดตบริการ</h2>
+            <p>แจ้งเตือนโปรโมชั่นใกล้หมดเขต และประกาศการเปลี่ยนแปลงสำคัญ</p>
+          </div>
+        </div>
+        <button class="btn-icon" id="btn-close-notif">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <!-- Subcategory Tabs in Notification Modal -->
+      <div id="notif-tab-filter-container">
+        <button type="button" class="notif-tab-btn active" data-notif-tab="all">
+          🔘 ทั้งหมด <span class="badge-count" id="notif-count-all"></span>
+        </button>
+        <button type="button" class="notif-tab-btn" data-notif-tab="domestic">
+          🇹🇭 ในประเทศ <span class="badge-count" id="notif-count-domestic"></span>
+        </button>
+        <button type="button" class="notif-tab-btn" data-notif-tab="international">
+          🌐 ระหว่างประเทศ <span class="badge-count" id="notif-count-intl"></span>
+        </button>
+        <button type="button" class="notif-tab-btn" data-notif-tab="new_promo">
+          ✨ บริการใหม่ & โปรโมชั่น <span class="badge-count" id="notif-count-promo"></span>
+        </button>
+        <button type="button" class="notif-tab-btn" data-notif-tab="memos">
+          📜 บันทึกสั่งการ <span class="badge-count" id="notif-count-memos"></span>
+        </button>
+      </div>
+
+      <div class="modal-sheet-body" id="notif-sheet-body">
+        <!-- Dynamically populated notifications -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Complete Rates & Boxes Modal -->
+  <div class="modal-overlay" id="rates-modal">
+    <div class="modal-sheet" style="max-width: 980px;">
+      <div class="modal-sheet-header">
+        <div class="modal-title-group">
+          <div class="modal-title-icon" style="background: linear-gradient(135deg, #0071e3, #64d2ff);">
+            <i data-lucide="badge-percent"></i>
+          </div>
+          <div class="modal-title-text">
+            <h2>📮 ตารางอัตราค่าบริการ, ค่ากล่อง & บริการหุ้มห่อ</h2>
+            <p>หีบห่อ · จดหมาย · สิ่งพิมพ์ · EMS · พัสดุ · Eco · FUZE POST · ค่ากล่อง ก-ฉ/1-6</p>
+          </div>
+        </div>
+        <button class="btn-icon" id="btn-close-rates">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <div class="modal-sheet-body" style="padding: 14px 16px;">
+        <div style="padding: 8px 12px; background: rgba(255, 149, 0, 0.12); border: 1px solid rgba(255, 149, 0, 0.3); border-radius: var(--radius-sm); font-size: 0.8rem; color: #ffb340; margin-bottom: 12px; line-height: 1.5;">
+          <strong>ค่าลงทะเบียน:</strong> หีบห่อ +15 บ. (ชดใช้ 500.-) / จดหมาย & สิ่งพิมพ์ +13 บ. (ชดใช้ 300.-) &nbsp;|&nbsp; <strong>⛽ Fuel Surcharge:</strong> +3 บ./ชิ้น (EMS & eCo-Post)
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 12px;">
+          <!-- 1.1 จดหมายแบบหีบห่อ (Packet: ลงทะเบียน +15 บาท) -->
+          <div class="detail-section" style="border-color: rgba(48, 209, 88, 0.35); background: rgba(48, 209, 88, 0.05);">
+            <div class="section-heading" style="color: var(--apple-mint);">
+              <i data-lucide="package" style="color: var(--apple-mint);"></i> 📦 1. จดหมายแบบหีบห่อ (≤ 2 กก.)
+            </div>
+            <div class="specs-table-container">
+              <table class="specs-table">
+                <thead>
+                  <tr style="background: rgba(255,255,255,0.06);">
+                    <th>พิกัดน้ำหนัก</th>
+                    <th style="color: var(--text-primary);">ธรรมดาหีบห่อ</th>
+                    <th style="color: var(--apple-mint); font-weight: 700;">ลงทะเบียน (+15บ.)</th>
+                  </tr>
+                </thead>
+                <tbody id="rates-packet-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 1.2 จดหมายประเภทซอง (Letter Envelope: ลงทะเบียน +13 บาท) -->
+          <div class="detail-section">
+            <div class="section-heading" style="color: var(--apple-blue);">
+              <i data-lucide="mail" style="color: var(--apple-blue);"></i> ✉️ 2. จดหมายประเภทซอง
+            </div>
+            <div class="specs-table-container" style="max-height: 240px; overflow-y: auto;">
+              <table class="specs-table">
+                <thead>
+                  <tr style="background: rgba(255,255,255,0.06);">
+                    <th>พิกัดน้ำหนัก</th>
+                    <th>ธรรมดา (เริ่ม 5บ.)</th>
+                    <th style="color: var(--apple-blue); font-weight: 700;">ลงทะเบียน (+13บ.)</th>
+                  </tr>
+                </thead>
+                <tbody id="rates-letter-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 1.3 สิ่งพิมพ์ / ของตีพิมพ์ (Printed Matters: ลงทะเบียน +13 บาท) -->
+          <div class="detail-section">
+            <div class="section-heading" style="color: var(--apple-teal);">
+              <i data-lucide="book-open" style="color: var(--apple-teal);"></i> 📑 3. ของตีพิมพ์ (สิ่งพิมพ์)
+            </div>
+            <div class="specs-table-container" style="max-height: 240px; overflow-y: auto;">
+              <table class="specs-table">
+                <thead>
+                  <tr style="background: rgba(255,255,255,0.06);">
+                    <th>พิกัดน้ำหนัก</th>
+                    <th>ของตีพิมพ์</th>
+                    <th style="color: var(--apple-teal); font-weight: 700;">ลงทะเบียน (+13บ.)</th>
+                  </tr>
+                </thead>
+                <tbody id="rates-printed-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 12px;">
+          <div class="detail-section">
+            <div class="section-heading" style="color: var(--text-link);">
+              <i data-lucide="zap" style="color: var(--apple-blue);"></i> ⚡ EMS ในประเทศ (สูงสุด 30 กก.)
+            </div>
+            <div class="specs-table-container" style="max-height: 240px; overflow-y: auto;">
+              <table class="specs-table" id="table-ems">
+                <thead>
+                  <tr style="background: rgba(255,255,255,0.06);">
+                    <th>พิกัดน้ำหนัก</th>
+                    <th>ปกติ (บ.)</th>
+                    <th style="color: var(--apple-mint);">+Fuel (บ.)</th>
+                  </tr>
+                </thead>
+                <tbody id="rates-ems-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <div class="section-heading" style="color: var(--apple-orange);">
+              <i data-lucide="box" style="color: var(--apple-orange);"></i> 📦 พัสดุไปรษณีย์ในประเทศ (P)
+            </div>
+            <div class="specs-table-container" style="max-height: 240px; overflow-y: auto;">
+              <table class="specs-table">
+                <thead>
+                  <tr style="background: rgba(255,255,255,0.06);">
+                    <th>พิกัดน้ำหนัก</th>
+                    <th>ระยะเวลานำจ่าย</th>
+                    <th style="color: var(--apple-mint);">ค่าส่ง (บ.)</th>
+                  </tr>
+                </thead>
+                <tbody id="rates-parcel-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <div class="section-heading" style="color: #64d2ff;">
+              <i data-lucide="send" style="color: #64d2ff;"></i> 📬 eCo-Post บริการส่งประหยัด (O)
+            </div>
+            <div class="specs-table-container" style="max-height: 240px; overflow-y: auto;">
+              <table class="specs-table">
+                <thead>
+                  <tr style="background: rgba(255,255,255,0.06);">
+                    <th>พิกัดน้ำหนัก</th>
+                    <th>ปกติ (บ.)</th>
+                    <th style="color: #64d2ff; font-weight: 700;">+Fuel (บ.)</th>
+                  </tr>
+                </thead>
+                <tbody id="rates-ecopost-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section" style="border-color: rgba(255, 149, 0, 0.35); background: rgba(255, 149, 0, 0.05); margin-bottom: 12px;">
+          <div class="section-heading" style="color: var(--apple-orange);">
+            <i data-lucide="boxes" style="color: var(--apple-orange);"></i> 📦 อัตราค่ากล่องและบริการหุ้มห่อ
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin-top: 8px;">
+            <div class="specs-table-container">
+              <div style="padding: 6px 10px; background: rgba(0,0,0,0.3); font-weight: 700; font-size: 0.78rem; color: #ff9500;">
+                🎁 1. กล่องสำเร็จรูป (ก - ฉ)
+              </div>
+              <table class="specs-table">
+                <thead>
+                  <tr style="background: rgba(255,255,255,0.06);">
+                    <th>แบบ/เบอร์</th>
+                    <th>ขนาด (กxยxส ซม.)</th>
+                    <th>ราคาจำหน่าย</th>
+                    <th style="color: var(--apple-mint);">ค่าหุ้มห่อ</th>
+                  </tr>
+                </thead>
+                <tbody id="rates-box-ready-body"></tbody>
+              </table>
+            </div>
+
+            <div class="specs-table-container">
+              <div style="padding: 6px 10px; background: rgba(0,0,0,0.3); font-weight: 700; font-size: 0.78rem; color: #ffd60a;">
+                📦 2. กล่องธรรมดา (1 - 6) & กล่องลูกค้า
+              </div>
+              <table class="specs-table">
+                <thead>
+                  <tr style="background: rgba(255,255,255,0.06);">
+                    <th>แบบ/เบอร์</th>
+                    <th>ขนาด (กxยxส ซม.)</th>
+                    <th>ราคาจำหน่าย</th>
+                    <th style="color: var(--apple-mint);">ค่าหุ้มห่อ</th>
+                  </tr>
+                </thead>
+                <tbody id="rates-box-plain-body"></tbody>
+              </table>
+            </div>
+
+            <div class="specs-table-container">
+              <div style="padding: 6px 10px; background: rgba(0,0,0,0.3); font-weight: 700; font-size: 0.78rem; color: var(--apple-teal);">
+                🛡️ 3. อัตราค่าวัสดุหุ้มห่อ & กันกระแทก
+              </div>
+              <table class="specs-table">
+                <thead>
+                  <tr style="background: rgba(255,255,255,0.06);">
+                    <th>รายการสินค้า</th>
+                    <th>ขนาด</th>
+                    <th style="color: var(--apple-teal); font-weight: 700;">ราคาจำหน่าย</th>
+                  </tr>
+                </thead>
+                <tbody id="rates-packaging-mat-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section" style="border-color: rgba(100, 210, 255, 0.35); background: rgba(100, 210, 255, 0.05); margin-bottom: 12px;">
+          <div class="section-heading" style="color: #64d2ff; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="snowflake" style="color: #64d2ff;"></i> ❄️ ตารางอัตราค่าบริการ FUZE POST
+            </div>
+            <a href="https://www.fuzepost.co.th/rate" target="_blank" rel="noreferrer noopener" class="btn btn-secondary" style="font-size: 0.72rem; padding: 2px 8px;">
+              <i data-lucide="external-link"></i> เว็บคำนวณราคา fuzepost.co.th
+            </a>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin-top: 8px;">
+            <div class="specs-table-container">
+              <div style="padding: 6px 10px; background: rgba(0,0,0,0.3); font-weight: 700; font-size: 0.78rem; color: var(--apple-teal);">
+                📦 1. กล่องควบคุมอุณหภูมิ (Cool Box)
+              </div>
+              <table class="specs-table">
+                <thead>
+                  <tr style="background: rgba(255,255,255,0.06);">
+                    <th>ขนาด / พิกัด</th>
+                    <th>แช่เย็น (0-8°C)</th>
+                    <th style="color: var(--apple-teal);">แช่แข็ง (< -15°C)</th>
+                  </tr>
+                </thead>
+                <tbody id="rates-fuze-cool-body"></tbody>
+              </table>
+            </div>
+
+            <div class="specs-table-container">
+              <div style="padding: 6px 10px; background: rgba(0,0,0,0.3); font-weight: 700; font-size: 0.78rem; color: var(--apple-mint);">
+                🧊 2. กล่องโฟมลูกค้านำมาเอง (Foam Box)
+              </div>
+              <table class="specs-table">
+                <thead>
+                  <tr style="background: rgba(255,255,255,0.06);">
+                    <th>ขนาดกล่องโฟม</th>
+                    <th>กทม./ปริมณฑล</th>
+                    <th style="color: var(--apple-mint);">ต่างจังหวัด</th>
+                  </tr>
+                </thead>
+                <tbody id="rates-fuze-foam-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Service Detail Sheet Modal -->
+  <div class="modal-overlay" id="detail-modal">
+    <div class="modal-sheet">
+      <div class="modal-sheet-header">
+        <div class="modal-title-group">
+          <div class="modal-title-icon" id="detail-icon" style="background: linear-gradient(135deg, var(--apple-blue), var(--apple-indigo));">
+            <i data-lucide="package"></i>
+          </div>
+          <div class="modal-title-text">
+            <h2 id="detail-title">ชื่อบริการ</h2>
+            <p id="detail-category-meta">บริการไปรษณีย์</p>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <!-- Edit button inside detail is Admin only (With clear label!) -->
+          <button class="btn btn-secondary admin-only-btn" id="detail-btn-edit" title="แก้ไขการ์ดนี้ (เฉพาะ Admin)" style="font-size: 0.74rem; padding: 4px 10px; color: #64d2ff; border-color: rgba(100, 210, 255, 0.4); background: rgba(100, 210, 255, 0.08); display: none;">
+            <i data-lucide="sliders" style="width: 13px; height: 13px;"></i> <span class="btn-text">แก้ไข</span>
+          </button>
+          <!-- Version History button (Admin Only) -->
+          <button class="btn-icon admin-only-btn" id="detail-btn-history" title="ประวัติแก้ไข & กู้คืน (Admin)" style="color: var(--text-secondary); display: none;">
+            <i data-lucide="history" style="width: 16px; height: 16px;"></i>
+          </button>
+          <!-- Delete button inside detail (Admin Only) -->
+          <button class="btn btn-secondary admin-only-btn" id="detail-btn-delete" title="ลบการ์ดนี้ออกจากระบบ (เฉพาะ Admin)" style="font-size: 0.74rem; padding: 4px 10px; color: #ff453a; border-color: rgba(255, 69, 58, 0.4); background: rgba(255, 69, 58, 0.08); display: none;">
+            <i data-lucide="trash-2" style="width: 13px; height: 13px; color: #ff453a;"></i> <span class="btn-text">ลบ</span>
+          </button>
+          <button class="btn-icon" id="btn-close-detail" title="ปิดหน้าต่าง">
+            <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-sheet-body" id="detail-sheet-body">
+        <!-- Dynamically rendered Lego Blocks -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Create / Edit Service Modal (Admin Only) -->
+  <div class="modal-overlay" id="service-form-modal">
+    <div class="modal-sheet" style="max-width: 840px;">
+      <div class="modal-sheet-header">
+        <div class="modal-title-group">
+          <div class="modal-title-icon" id="form-header-icon-box" style="background: var(--apple-blue);">
+            <i data-lucide="layers" id="form-header-icon"></i>
+          </div>
+          <div class="modal-title-text">
+            <h2 id="form-modal-title">จัดกระดานข้อมูลบริการ (Lego Canvas)</h2>
+            <p>ปรับสีธีมการ์ด เลือกไอคอน และจัดวางบล็อกข้อมูล (เฉพาะ Admin)</p>
+          </div>
+        </div>
+        <button class="btn-icon" id="btn-close-form">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <div class="modal-sheet-body">
+        <form id="service-hub-form">
+          <input type="hidden" id="form-doc-id">
+          <input type="hidden" id="form-selected-color" value="#0071e3">
+          <input type="hidden" id="form-selected-icon" value="package">
+
+          <!-- Card Visual Customizer Section -->
+          <div class="detail-section" style="margin-bottom: 12px; background: rgba(255, 255, 255, 0.04); border-color: var(--border-strong);">
+            <div style="font-size: 0.84rem; font-weight: 700; color: #fff; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="palette" style="color: var(--apple-teal); width: 16px; height: 16px;"></i> ปรับแต่งสีการ์ด & เลือกไอคอน (Visual Styling):
+            </div>
+
+            <div style="margin-bottom: 10px;">
+              <label class="form-label">1. เลือกสีประจำบริการ (Card Accent Color):</label>
+              <div class="color-palette-picker" id="color-palette-picker">
+                <button type="button" class="color-swatch active" data-color="#0071e3" style="background: #0071e3;" title="น้ำเงิน"></button>
+                <button type="button" class="color-swatch" data-color="#64d2ff" style="background: #64d2ff;" title="ฟ้าคราม"></button>
+                <button type="button" class="color-swatch" data-color="#ff9500" style="background: #ff9500;" title="ส้มสดใส"></button>
+                <button type="button" class="color-swatch" data-color="#30d158" style="background: #30d158;" title="เขียว"></button>
+                <button type="button" class="color-swatch" data-color="#ff453a" style="background: #ff453a;" title="แดงด่วน"></button>
+                <button type="button" class="color-swatch" data-color="#bf5af2" style="background: #bf5af2;" title="ม่วง"></button>
+                <button type="button" class="color-swatch" data-color="#ffd60a" style="background: #ffd60a;" title="เหลืองทอง"></button>
+                <button type="button" class="color-swatch" data-color="#ff375f" style="background: #ff375f;" title="ชมพู"></button>
+                <button type="button" class="color-swatch" data-color="#5e5ce6" style="background: #5e5ce6;" title="คราม Indigo"></button>
+                <button type="button" class="color-swatch" data-color="#8e8e93" style="background: #8e8e93;" title="เทา"></button>
+              </div>
+            </div>
+
+            <div>
+              <label class="form-label">2. เลือกไอคอนประจำบริการ:</label>
+              <div class="icon-picker-grid" id="icon-picker-grid">
+                <button type="button" class="icon-choice-btn active" data-icon="package" title="พัสดุ / กล่อง"><i data-lucide="package"></i><span class="icon-label">พัสดุ</span></button>
+                <button type="button" class="icon-choice-btn" data-icon="mail" title="จดหมาย & ซอง"><i data-lucide="mail"></i><span class="icon-label">จดหมาย</span></button>
+                <button type="button" class="icon-choice-btn" data-icon="file-text" title="ลงทะเบียน / เอกสาร"><i data-lucide="file-text"></i><span class="icon-label">ลงทะเบียน</span></button>
+                <button type="button" class="icon-choice-btn" data-icon="zap" title="EMS ด่วนพิเศษ"><i data-lucide="zap"></i><span class="icon-label">EMS ด่วน</span></button>
+                <button type="button" class="icon-choice-btn" data-icon="badge-percent" title="eCo-Post ส่งประหยัด"><i data-lucide="badge-percent"></i><span class="icon-label">ส่งประหยัด</span></button>
+                <button type="button" class="icon-choice-btn" data-icon="truck" title="ขนส่ง / EMS Jumbo"><i data-lucide="truck"></i><span class="icon-label">ขนส่งใหญ่</span></button>
+                <button type="button" class="icon-choice-btn" data-icon="gift" title="โปรโมชั่น & ส่วนลด"><i data-lucide="gift"></i><span class="icon-label">โปรโมชั่น</span></button>
+                <button type="button" class="icon-choice-btn" data-icon="globe" title="บริการระหว่างประเทศ"><i data-lucide="globe"></i><span class="icon-label">ต่างประเทศ</span></button>
+                <button type="button" class="icon-choice-btn" data-icon="send" title="ePacket ส่งพัสดุข้ามแดน"><i data-lucide="send"></i><span class="icon-label">ePacket</span></button>
+                <button type="button" class="icon-choice-btn" data-icon="plane" title="Courier Post ทางอากาศ"><i data-lucide="plane"></i><span class="icon-label">เครื่องบิน</span></button>
+                <button type="button" class="icon-choice-btn" data-icon="snowflake" title="FUZE POST พัสดุแช่เย็น"><i data-lucide="snowflake"></i><span class="icon-label">แช่เย็น</span></button>
+                <button type="button" class="icon-choice-btn" data-icon="boxes" title="กล่อง ซอง & หุ้มห่อ"><i data-lucide="boxes"></i><span class="icon-label">กล่อง/ซอง</span></button>
+                <button type="button" class="icon-choice-btn" data-icon="megaphone" title="ข่าวสาร / ประกาศคำสั่ง"><i data-lucide="megaphone"></i><span class="icon-label">ประกาศ</span></button>
+                <button type="button" class="icon-choice-btn" data-icon="shield-check" title="รับประกัน / ประกันภัย"><i data-lucide="shield-check"></i><span class="icon-label">ประกันภัย</span></button>
+                <button type="button" class="icon-choice-btn" data-icon="luggage" title="Travel Lite สัมภาระเดินทาง"><i data-lucide="luggage"></i><span class="icon-label">สัมภาระ</span></button>
+                <button type="button" class="icon-choice-btn" data-icon="smartphone" title="Prompt Post ระบบดิจิทัล"><i data-lucide="smartphone"></i><span class="icon-label">ดิจิทัล</span></button>
+                <button type="button" class="icon-choice-btn" data-icon="star" title="บริการเด่น / POST Family"><i data-lucide="star"></i><span class="icon-label">สมาชิก</span></button>
+                <button type="button" class="icon-choice-btn" data-icon="clock" title="กำหนดเวลา / SLA"><i data-lucide="clock"></i><span class="icon-label">เวลาส่ง</span></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Info Block -->
+          <div class="detail-section" style="margin-bottom: 12px; background: rgba(0, 113, 227, 0.06); border-color: rgba(0, 113, 227, 0.2);">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="form-category-type">หมวดหลักบริการ *</label>
+                <select id="form-category-type" class="form-select" required>
+                  <option value="domestic">🇹🇭 บริการในประเทศ</option>
+                  <option value="international">🌐 บริการระหว่างประเทศ</option>
+                  <option value="coldchain">❄️ ควบคุมอุณหภูมิ (FUZE POST)</option>
+                  <option value="promotions">🎁 โปรโมชั่น & ส่วนลดพิเศษ</option>
+                  <option value="news">📢 ศูนย์ข่าว & ประกาศเปลี่ยนแปลงบริการ</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="form-title">ชื่อบริการ / ชื่อโปรโมชั่น / หัวข้อข่าว *</label>
+                <input type="text" id="form-title" class="form-control" placeholder="เช่น ส่วนลด EMS สุดสัปดาห์, ปรับอัตราค่าบริการใหม่" required>
+              </div>
+            </div>
+
+            <!-- Thai Calendar Picker Row -->
+            <div id="form-dates-row" style="margin-top: 4px; display: flex; gap: 8px;">
+              <!-- Start Date -->
+              <div style="flex: 1; background: rgba(0,0,0,0.2); border: 1px solid rgba(0,113,227,0.3); border-radius: var(--radius-sm); padding: 10px 12px;">
+                <label class="form-label" style="margin-bottom: 6px; color: var(--apple-blue); font-size: 0.75rem;">📅 วันเริ่มต้น / มีผลบังคับใช้</label>
+                <button type="button" id="cal-btn-start" onclick="window.openThaiCalendar('start')"
+                  style="width: 100%; text-align: left; padding: 7px 10px; background: rgba(0,113,227,0.08); border: 1px solid rgba(0,113,227,0.25); border-radius: var(--radius-sm); color: #aaa; font-size: 0.84rem; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                  <span>📅</span><span id="cal-display-start">เลือกวันที่...</span>
+                </button>
+                <input type="hidden" id="form-start-date">
+              </div>
+              <!-- End Date -->
+              <div style="flex: 1; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,149,0,0.3); border-radius: var(--radius-sm); padding: 10px 12px;">
+                <label class="form-label" style="margin-bottom: 6px; color: var(--apple-orange); font-size: 0.75rem;">⏳ วันหมดเขต / สิ้นสุด</label>
+                <button type="button" id="cal-btn-end" onclick="window.openThaiCalendar('end')"
+                  style="width: 100%; text-align: left; padding: 7px 10px; background: rgba(255,149,0,0.08); border: 1px solid rgba(255,149,0,0.25); border-radius: var(--radius-sm); color: #aaa; font-size: 0.84rem; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                  <span>📅</span><span id="cal-display-end">เลือกวันที่...</span>
+                </button>
+                <input type="hidden" id="form-end-date">
+              </div>
+            </div>
+
+            <div class="form-row" style="margin-bottom: 10px;">
+              <div class="form-group" style="flex: 3; margin-bottom: 0;">
+                <label class="form-label" for="form-summary">คำโปรย / จุดเด่น / ไฮไลต์</label>
+                <input type="text" id="form-summary" class="form-control" placeholder="เช่น “ลดทันที 5 บาท เมื่อส่ง EMS ในวันเสาร์-อาทิตย์”">
+              </div>
+              <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                <label class="form-label" for="form-order">🔢 ลำดับที่ (Order)</label>
+                <input type="number" id="form-order" class="form-control" value="1" min="1" max="999" placeholder="1">
+              </div>
+            </div>
+
+            <!-- Visibility Toggle Switch for Admin -->
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: rgba(0,0,0,0.25); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
+              <div>
+                <div style="font-size: 0.82rem; font-weight: 700; color: #fff;">👁️ สถานะการแสดงผล (Visibility)</div>
+                <div style="font-size: 0.72rem; color: var(--text-secondary);">เปิดแสดงให้พนักงานเห็น หรือ ติ๊กซ่อนไว้</div>
+              </div>
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
+                <input type="checkbox" id="form-is-active" checked style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--apple-mint);">
+                <span id="form-is-active-label" style="font-size: 0.82rem; font-weight: 700; color: var(--apple-mint);">เปิดแสดงผล (Active)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Dynamic Lego Blocks Canvas Container -->
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 14px; margin-bottom: 6px;">
+            <div style="font-size: 0.88rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="component" style="width: 16px; height: 16px; color: var(--apple-teal);"></i> บล็อกส่วนประกอบข้อมูล (Lego Blocks):
+            </div>
+            <span style="font-size: 0.72rem; color: var(--text-tertiary);">กด ⬆️ / ⬇️ เพื่อสลับลำดับ</span>
+          </div>
+
+          <div class="lego-blocks-container" id="lego-blocks-container">
+            <!-- Dynamically populated lego block cards -->
+          </div>
+
+          <!-- Add Lego Block Toolbar -->
+          <div class="lego-add-toolbar">
+            <span class="lego-add-label">+ เพิ่มบล็อก:</span>
+            <button type="button" class="lego-add-btn" onclick="window.addLegoBlock('specs_table')">
+              <i data-lucide="table"></i> ตารางสเปก/ข้อมูล
+            </button>
+            <button type="button" class="lego-add-btn" onclick="window.addLegoBlock('checklist')">
+              <i data-lucide="clipboard-list"></i> เอกสาร/เงื่อนไข
+            </button>
+            <button type="button" class="lego-add-btn" onclick="window.addLegoBlock('sop_steps')">
+              <i data-lucide="check-circle-2"></i> ขั้นตอน SOP
+            </button>
+            <button type="button" class="lego-add-btn" onclick="window.addLegoBlock('pdf_embed')">
+              <i data-lucide="file-text"></i> เอกสารแนบ/PDF
+            </button>
+            <button type="button" class="lego-add-btn" onclick="window.addLegoBlock('text_block')">
+              <i data-lucide="align-left"></i> ข้อความรายละเอียด
+            </button>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;">
+            <button type="button" class="btn btn-secondary" id="btn-cancel-form">ยกเลิก</button>
+            <button type="submit" class="btn btn-primary" id="btn-submit-form">บันทึกข้อมูล (Admin)</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Categories Manager Modal (Admin Only) -->
+  <div class="modal-overlay" id="categories-modal">
+    <div class="modal-sheet" style="max-width: 500px;">
+      <div class="modal-sheet-header">
+        <div class="modal-title-group">
+          <div class="modal-title-icon" style="background: var(--apple-purple);">
+            <i data-lucide="tag"></i>
+          </div>
+          <div class="modal-title-text">
+            <h2>จัดการหมวดหมู่บริการ (Admin)</h2>
+            <p>เพิ่มหรือจัดระเบียบกลุ่มบริการ</p>
+          </div>
+        </div>
+        <button class="btn-icon" id="btn-close-categories">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-sheet-body">
+        <!-- Section 1: Main Category Tabs Reordering -->
+        <div style="margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border-subtle);">
+          <div style="font-size: 0.84rem; font-weight: 700; color: #64d2ff; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="layout-grid" style="width: 15px; height: 15px; color: #64d2ff;"></i> จัดลำดับแท็บหมวดหมู่ด้านบน (Category Tabs):
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="window.resetCategoryTabsOrder()" style="font-size: 0.7rem; padding: 2px 7px;">
+              <i data-lucide="rotate-ccw" style="width: 11px; height: 11px;"></i> รีเซ็ต
+            </button>
+          </div>
+          <div id="category-tab-manager-list" style="display: flex; flex-direction: column; gap: 6px;">
+            <!-- Populated dynamically with [⬆️] [⬇️] buttons for each tab -->
+          </div>
+        </div>
+
+        <!-- Section 2: Add New Service Category -->
+        <div style="font-size: 0.84rem; font-weight: 700; color: var(--apple-mint); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+          <i data-lucide="list-plus" style="width: 15px; height: 15px; color: var(--apple-mint);"></i> เพิ่มหมวดหมู่ & จัดการการ์ดบริการ:
+        </div>
+        <form id="add-category-form" style="display: flex; gap: 8px; margin-bottom: 14px;">
+          <input type="text" id="new-cat-name" class="form-control" placeholder="ชื่อหมวดหมู่ใหม่..." required>
+          <input type="color" id="new-cat-color" value="#0071e3" style="width: 44px; height: 38px; border: none; cursor: pointer; background: transparent;">
+          <button type="submit" class="btn btn-primary">
+            <i data-lucide="plus"></i> เพิ่ม
+          </button>
+        </form>
+        <div id="category-manager-list" style="display: flex; flex-direction: column; gap: 8px;">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Login Modal (PIN & Email) -->
+  <div class="modal-overlay" id="admin-pin-modal">
+    <div class="modal-sheet" style="max-width: 420px;">
+      <div class="modal-sheet-header">
+        <div class="modal-title-group">
+          <div class="modal-title-icon" id="admin-shield-icon" style="background: linear-gradient(135deg, var(--apple-blue), var(--apple-indigo)); cursor: pointer;" title="คลิกเพื่อสลับโหมด">
+            <i data-lucide="shield-check"></i>
+          </div>
+          <div class="modal-title-text">
+            <h2>🔐 ยืนยันสิทธิ์ผู้ดูแลระบบ</h2>
+            <p>เข้าถึงระบบจัดการข้อมูลและบริการ</p>
+          </div>
+        </div>
+        <button class="btn-icon" id="btn-close-admin-pin">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-sheet-body" style="padding: 20px;">
+        <!-- Mode Switcher Tabs -->
+        <div style="display: flex; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 3px; margin-bottom: 16px;">
+          <button type="button" id="tab-login-pin" class="btn active" style="flex: 1; font-size: 0.78rem; padding: 6px 0; border: none; border-radius: var(--radius-sm); background: var(--apple-blue); color: #fff;">
+            <i data-lucide="key-round" style="width: 13px; height: 13px;"></i> PIN ด่วน
+          </button>
+          <button type="button" id="tab-login-email" class="btn" style="flex: 1; font-size: 0.78rem; padding: 6px 0; border: none; border-radius: var(--radius-sm); background: transparent; color: var(--text-secondary);">
+            <i data-lucide="mail" style="width: 13px; height: 13px;"></i> อีเมล & รหัสผ่าน
+          </button>
+        </div>
+
+        <!-- PIN Login Form -->
+        <form id="admin-pin-form">
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label" for="admin-pin-input">รหัสผ่านความปลอดภัย (Security PIN)</label>
+            <input type="password" id="admin-pin-input" class="form-control" placeholder="••••" style="font-size: 1.25rem; letter-spacing: 6px; text-align: center;" required autofocus autocomplete="current-password">
+          </div>
+          <p id="admin-pin-error" style="color: var(--apple-red); font-size: 0.78rem; display: none; margin-bottom: 12px; text-align: center;">
+            ⚠️ รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง
+          </p>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+            <button type="button" id="btn-forgot-pin" style="font-size: 0.74rem; background: none; border: none; color: var(--text-tertiary); cursor: pointer; text-decoration: underline;">
+              ❓ ลืมรหัสผ่าน?
+            </button>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="btn btn-secondary" id="btn-cancel-admin-pin">ยกเลิก</button>
+              <button type="submit" class="btn btn-primary">เข้าสู่ระบบ</button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Email & Password Login Form -->
+        <form id="admin-email-form" style="display: none;">
+          <div class="form-group" style="margin-bottom: 10px;">
+            <label class="form-label" for="admin-email-input">อีเมลผู้ดูแลระบบ (Admin Email)</label>
+            <input type="email" id="admin-email-input" class="form-control" placeholder="กรอกอีเมลของคุณ" required autocomplete="username">
+          </div>
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label" for="admin-password-input">รหัสผ่าน (Password)</label>
+            <input type="password" id="admin-password-input" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+          </div>
+          <p id="admin-email-error" style="color: var(--apple-red); font-size: 0.78rem; display: none; margin-bottom: 12px; text-align: center;">
+            ⚠️ อีเมลหรือรหัสผ่านไม่ถูกต้อง
+          </p>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+            <button type="button" id="btn-forgot-password-link" style="font-size: 0.74rem; background: none; border: none; color: var(--text-tertiary); cursor: pointer; text-decoration: underline;">
+              ❓ ลืมรหัสผ่าน?
+            </button>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="btn btn-secondary" id="btn-cancel-admin-email">ยกเลิก</button>
+              <button type="submit" class="btn btn-primary" id="btn-submit-email-login">เข้าสู่ระบบ</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change PIN Modal (Admin Only) -->
+  <div class="modal-overlay" id="change-pin-modal">
+    <div class="modal-sheet" style="max-width: 420px;">
+      <div class="modal-sheet-header">
+        <div class="modal-title-group">
+          <div class="modal-title-icon" style="background: linear-gradient(135deg, var(--apple-mint), var(--apple-teal));">
+            <i data-lucide="key-round"></i>
+          </div>
+          <div class="modal-title-text">
+            <h2>🔑 เปลี่ยนรหัสผ่าน Admin PIN</h2>
+            <p>กำหนดรหัสผ่านใหม่สำหรับเข้าสู่ระบบผู้ดูแล</p>
+          </div>
+        </div>
+        <button class="btn-icon" id="btn-close-change-pin">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-sheet-body" style="padding: 20px;">
+        <form id="change-pin-form">
+          <div class="form-group">
+            <label class="form-label" for="current-pin-input">รหัสผ่าน PIN ปัจจุบัน *</label>
+            <input type="password" id="current-pin-input" class="form-control" placeholder="••••" style="text-align: center; letter-spacing: 4px;" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="new-pin-input">รหัสผ่าน PIN ใหม่ (4-6 หลัก) *</label>
+            <input type="password" id="new-pin-input" class="form-control" placeholder="••••" style="text-align: center; letter-spacing: 4px;" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="confirm-pin-input">ยืนยันรหัสผ่าน PIN ใหม่อีกครั้ง *</label>
+            <input type="password" id="confirm-pin-input" class="form-control" placeholder="••••" style="text-align: center; letter-spacing: 4px;" required>
+          </div>
+          <p id="change-pin-error" style="color: var(--apple-red); font-size: 0.78rem; display: none; margin-bottom: 12px; text-align: center;">
+            ⚠️ ข้อมูลไม่ถูกต้อง
+          </p>
+          <div style="display: flex; gap: 8px; justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary" id="btn-cancel-change-pin">ยกเลิก</button>
+            <button type="submit" class="btn btn-primary">บันทึกรหัสผ่านใหม่</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forgot Password / PIN Recovery Modal -->
+  <div class="modal-overlay" id="forgot-pin-modal">
+    <div class="modal-sheet" style="max-width: 440px;">
+      <div class="modal-sheet-header">
+        <div class="modal-title-group">
+          <div class="modal-title-icon" style="background: linear-gradient(135deg, var(--apple-orange), var(--apple-red));">
+            <i data-lucide="shield-alert"></i>
+          </div>
+          <div class="modal-title-text">
+            <h2>🛡️ กู้คืนรหัสผ่าน Admin</h2>
+            <p>ส่งลิงก์รีเซ็ตรหัสผ่านเข้าอีเมล หรือใช้ Master Key</p>
+          </div>
+        </div>
+        <button class="btn-icon" id="btn-close-forgot-pin">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-sheet-body" style="padding: 20px;">
+        <!-- Email Reset Option -->
+        <div style="padding: 14px; background: rgba(0, 113, 227, 0.08); border: 1px solid rgba(0, 113, 227, 0.25); border-radius: var(--radius-md); margin-bottom: 16px;">
+          <div style="font-weight: 700; font-size: 0.88rem; color: #fff; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+            <i data-lucide="mail" style="color: var(--apple-blue); width: 16px; height: 16px;"></i> ส่งลิงก์เข้าอีเมลที่ลงทะเบียน
+          </div>
+          <div style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 10px;">
+            ระบบจะส่งอีเมลพร้อมลิงก์สำหรับตั้งรหัสผ่านใหม่ไปยังอีเมลของคุณโดยตรง
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <input type="email" id="reset-email-input" class="form-control" placeholder="กรอกอีเมลของคุณ" style="font-size: 0.84rem;">
+            <button type="button" class="btn btn-primary" id="btn-send-reset-email" style="white-space: nowrap; font-size: 0.78rem;">
+              <i data-lucide="send"></i> ส่งลิงก์
+            </button>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; text-align: center; margin-bottom: 14px; color: var(--text-tertiary); font-size: 0.74rem;">
+          <div style="flex: 1; height: 1px; background: var(--border-subtle);"></div>
+          <span style="padding: 0 10px;">หรือ รีเซ็ตด้วย Master Recovery Key</span>
+          <div style="flex: 1; height: 1px; background: var(--border-subtle);"></div>
+        </div>
+
+        <form id="forgot-pin-form">
+          <div class="form-group">
+            <label class="form-label" for="recovery-key-input">Master Recovery Key *</label>
+            <input type="password" id="recovery-key-input" class="form-control" placeholder="ระบุ Master Key สำหรับกู้คืน" style="text-align: center;" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reset-new-pin-input">ตั้งรหัสผ่าน PIN ใหม่ *</label>
+            <input type="password" id="reset-new-pin-input" class="form-control" placeholder="••••" style="text-align: center; letter-spacing: 4px;" required>
+          </div>
+          <p id="forgot-pin-error" style="color: var(--apple-red); font-size: 0.78rem; display: none; margin-bottom: 12px; text-align: center;">
+            ⚠️ Master Key ไม่ถูกต้อง
+          </p>
+          <div style="display: flex; gap: 8px; justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary" id="btn-cancel-forgot-pin">ยกเลิก</button>
+            <button type="submit" class="btn btn-primary">รีเซ็ตรหัสผ่าน</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Department Calendar Modal -->
+  <div class="modal-overlay" id="calendar-modal">
+    <div class="modal-sheet" style="max-width: 960px; max-height: 90vh;">
+      <div class="modal-sheet-header">
+        <div class="modal-title-group">
+          <div class="modal-title-icon" style="background: linear-gradient(135deg, #0071e3, #64d2ff);">
+            <i data-lucide="calendar"></i>
+          </div>
+          <div class="modal-title-text">
+            <h2>📅 ปฏิทินแผนก & กำหนดการปฏิบัติงาน</h2>
+            <p>วันหยุดทำการ, ไทม์ไลน์โปรโมชั่น, รอบรถตัดตอน และนัดหมายในแผนก</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button class="btn btn-line" id="btn-share-calendar-line" style="font-size: 0.76rem; padding: 5px 10px;">
+            <i data-lucide="share-2"></i> แชร์ LINE
+          </button>
+          <button class="btn btn-primary admin-only-btn" id="btn-open-create-event" style="font-size: 0.76rem; padding: 5px 12px; display: none;">
+            <i data-lucide="plus"></i> เพิ่มกำหนดการ
+          </button>
+          <button class="btn-icon" id="btn-close-calendar">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+      </div>
+      <div class="modal-sheet-body" style="padding: 16px;">
+        <div class="calendar-layout-grid">
+          <!-- Calendar Month View (Left Column) -->
+          <div class="calendar-left-pane">
+            <div class="calendar-month-nav">
+              <button class="btn-icon" id="btn-cal-prev-month" title="เดือนก่อนหน้า">
+                <i data-lucide="chevron-left"></i>
+              </button>
+              <h3 id="cal-current-month-label" style="font-size: 1.02rem; font-weight: 700; color: #fff; margin: 0;"></h3>
+              <div style="display: flex; gap: 4px;">
+                <button class="btn btn-secondary" id="btn-cal-today" style="font-size: 0.72rem; padding: 3px 8px;">
+                  วันนี้
+                </button>
+                <button class="btn-icon" id="btn-cal-next-month" title="เดือนถัดไป">
+                  <i data-lucide="chevron-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Calendar Days Header -->
+            <div class="calendar-weekdays-grid">
+              <span style="color: var(--apple-red);">อา.</span>
+              <span>จ.</span>
+              <span>อ.</span>
+              <span>พ.</span>
+              <span>พฤ.</span>
+              <span>ศ.</span>
+              <span style="color: #64d2ff;">ส.</span>
+            </div>
+
+            <!-- Calendar Days Grid -->
+            <div class="calendar-days-grid" id="calendar-days-grid">
+              <!-- Dynamically Populated -->
+            </div>
+
+            <!-- Category Legend -->
+            <div class="calendar-legend">
+              <span class="legend-chip legend-holiday" style="color: #ffd60a;"><span class="chip-dot" style="background: #ffd60a;"></span> วันหยุดเปิดพิเศษ</span>
+              <span class="legend-chip legend-closed" style="color: var(--apple-red);"><span class="chip-dot" style="background: var(--apple-red);"></span> วันสิ้นปี</span>
+              <span class="legend-chip legend-leave" style="color: #ff375f;"><span class="chip-dot" style="background: #ff375f;"></span> 🏖️ ลาพักร้อน/ลากิจ</span>
+              <span class="legend-chip legend-duty" style="color: #64d2ff;"><span class="chip-dot" style="background: #64d2ff;"></span> 🚗 ปฏิบัติหน้าที่/อบรม</span>
+              <span class="legend-chip legend-dept" style="color: var(--apple-mint);"><span class="chip-dot" style="background: var(--apple-mint);"></span> กิจกรรมแผนก/สต็อก</span>
+              <span class="legend-chip legend-promo" style="color: #ff9500;"><span class="chip-dot" style="background: #ff9500;"></span> โปรโมชั่น</span>
+            </div>
+          </div>
+
+          <!-- Agenda List (Right Column) -->
+          <div class="calendar-right-pane">
+            <div class="agenda-header">
+              <div>
+                <h4 id="agenda-selected-date-title" style="font-size: 0.94rem; font-weight: 700; color: #fff; margin: 0;"></h4>
+                <div id="agenda-subtitle" style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 2px;"></div>
+              </div>
+            </div>
+            <div class="agenda-events-list" id="agenda-events-list">
+              <!-- Dynamically Populated -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add / Edit Calendar Event Modal -->
+  <div class="modal-overlay" id="calendar-event-modal">
+    <div class="modal-sheet" style="max-width: 480px;">
+      <div class="modal-sheet-header">
+        <div class="modal-title-group">
+          <div class="modal-title-icon" style="background: linear-gradient(135deg, #0071e3, #30d158);">
+            <i data-lucide="calendar-plus"></i>
+          </div>
+          <div class="modal-title-text">
+            <h2 id="calendar-event-modal-title">เพิ่มกำหนดการแผนก</h2>
+            <p>บันทึกวันลา, ปฏิบัติหน้าที่, วันหยุด หรือนัดหมายภายใน</p>
+          </div>
+        </div>
+        <button class="btn-icon" id="btn-close-event-modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-sheet-body" style="padding: 20px;">
+        <form id="calendar-event-form">
+          <input type="hidden" id="event-doc-id" value="">
+          <div class="form-group">
+            <label class="form-label" for="event-title">หัวข้อกำหนดการ / ชื่อผู้ปฏิบัติงาน *</label>
+            <input type="text" id="event-title" class="form-control" placeholder="เช่น นายสมชาย ลาพักร้อน, น.ส.วิภา ไปปฏิบัติหน้าที่นอกสถานที่" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="event-type">ประเภทกำหนดการ *</label>
+            <select id="event-type" class="form-control" required style="font-size: 0.86rem; font-weight: 600;">
+              <option value="leave">🏖️ ลาพักร้อน / ลากิจ / ลาป่วย</option>
+              <option value="duty">🚗 ไปปฏิบัติหน้าที่ / อบรม / เวรพิเศษ</option>
+              <option value="holiday">🟡 วันหยุดนักขัตฤกษ์ (เปิดบริการพิเศษ 08:00 - 17:00 น.)</option>
+              <option value="closed">🔴 วันสิ้นปี / ปิดทำการพิเศษ</option>
+              <option value="dept">🟢 กิจกรรมแผนก / ประชุม / สต็อก</option>
+              <option value="promo">🟠 โปรโมชั่น & ส่วนลด</option>
+              <option value="CUSTOM_NEW">✨ [+ เพิ่มประเภท/หัวข้อกำหนดการใหม่เอง...]</option>
+            </select>
+          </div>
+
+          <!-- Dynamic Custom Event Type Input Box -->
+          <div id="custom-event-type-box" style="display: none; padding: 10px 12px; background: rgba(0, 113, 227, 0.08); border: 1px dashed rgba(0, 113, 227, 0.4); border-radius: var(--radius-md); margin-bottom: 12px;">
+            <label class="form-label" style="color: #64d2ff; font-weight: 700; font-size: 0.78rem;">✨ ระบุชื่อประเภทกำหนดการใหม่ที่ต้องการ:</label>
+            <input type="text" id="custom-event-type-name" class="form-control" placeholder="เช่น เวรส่งต่อ, อบรมระบบ QMS, ตรวจนับพัสดุตกค้าง" style="font-size: 0.84rem; margin-bottom: 4px;">
+            <div style="font-size: 0.72rem; color: var(--text-tertiary);">💡 ระบบจะบันทึกประเภทนี้ไว้ในตัวเลือกให้ท่านใช้งานในครั้งต่อๆ ไปอัตโนมัติ</div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="event-date">วันที่ *</label>
+              <input type="date" id="event-date" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="event-time">เวลา / ช่วงเวลา / ผู้เกี่ยวข้อง</label>
+              <input type="text" id="event-time" class="form-control" placeholder="เช่น ทั้งวัน, 08:30 - 16:30 น.">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="event-detail">รายละเอียด / ข้อปฏิบัติ / ข้อมูลเพิ่มเติม</label>
+            <textarea id="event-detail" class="form-control" rows="3" placeholder="ระบุรายละเอียดเพิ่มเติม เบอร์ติดต่อ หรือผู้ปฏิบัติหน้าที่แทน"></textarea>
+          </div>
+          <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;">
+            <button type="button" class="btn btn-secondary" id="btn-cancel-event-modal">ยกเลิก</button>
+            <button type="submit" class="btn btn-primary" id="btn-submit-event">บันทึกกำหนดการ</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. Smart PDF Ingestion Dropzone Modal -->
+  <div class="modal-overlay" id="pdf-ingestion-modal">
+    <div class="modal-sheet" style="max-width: 580px;">
+      <div class="modal-sheet-header">
+        <div class="modal-title-group">
+          <div class="modal-title-icon" style="background: linear-gradient(135deg, #ffd60a, #ff9500);">
+            <i data-lucide="sparkles" style="color: #000;"></i>
+          </div>
+          <div class="modal-title-text">
+            <h2>✨ นำเข้า & เชื่อมโยงเอกสาร (Google Drive / PDF)</h2>
+            <p>เพิ่มเอกสารจาก Google Drive หรืออัปโหลดไฟล์ตรงเข้าสู่ระบบ</p>
+          </div>
+        </div>
+        <button class="btn-icon" id="btn-close-pdf-ingest">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <div class="modal-sheet-body" style="padding: 16px 20px;">
+        <!-- Tab Switcher (3 Modes) -->
+        <div style="display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px;">
+          <button type="button" class="btn active" id="tab-btn-gdrive" style="flex: 1; justify-content: center; font-weight: 700; font-size: 0.85rem;" onclick="window.switchIngestTab('gdrive')">
+            <i data-lucide="folder-symlink" style="color: #64d2ff;"></i> Google Drive
+          </button>
+          <button type="button" class="btn btn-secondary" id="tab-btn-weburl" style="flex: 1; justify-content: center; font-weight: 600; font-size: 0.85rem;" onclick="window.switchIngestTab('weburl')">
+            <i data-lucide="globe" style="color: #30d158;"></i> นำเข้าผ่านลิงก์เว็บ (URL)
+          </button>
+          <button type="button" class="btn btn-secondary" id="tab-btn-local" style="flex: 1; justify-content: center; font-weight: 600; font-size: 0.85rem;" onclick="window.switchIngestTab('local')">
+            <i data-lucide="file-up"></i> เลือกไฟล์ PDF
+          </button>
+        </div>
+
+        <!-- Panel 1: Google Drive Import Form -->
+        <div id="panel-ingest-gdrive">
+          <a href="https://drive.google.com/drive/folders/1zIKsjC6ldpxVdxTK5ofwE358YJUkmthG?authuser=pnk10501@gmail.com" target="_blank" rel="noreferrer" class="btn btn-secondary" style="color: #64d2ff; border-color: rgba(100, 210, 255, 0.4); background: rgba(100, 210, 255, 0.08); width: 100%; justify-content: center; margin-bottom: 14px; font-weight: 600; padding: 10px 14px;">
+            <i data-lucide="external-link" style="color: #64d2ff; width: 16px; height: 16px;"></i> เปิดโฟลเดอร์ Google Drive ปณท (pnk10501@gmail.com)
+          </a>
+
+          <form id="form-gdrive-ingest">
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label class="form-label" style="font-weight: 600; color: var(--text-primary);">
+                🔗 ลิงก์ไฟล์จาก Google Drive <span style="color: var(--apple-red); font-size: 0.76rem;">*จำเป็น</span>
+              </label>
+              <input type="text" id="gdrive-link-input" class="form-control" placeholder="วางลิงก์ เช่น https://drive.google.com/file/d/.../view" required style="font-size: 0.86rem;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label class="form-label" style="font-weight: 600; color: var(--text-primary);">
+                📝 ชื่อเรื่อง / หัวข้อคำสั่ง <span style="color: var(--apple-red); font-size: 0.76rem;">*จำเป็น</span>
+              </label>
+              <input type="text" id="gdrive-title-input" class="form-control" placeholder="เช่น บันทึกการไม่ชดใช้ค่าเสียหาย ข้อ 186" required style="font-size: 0.86rem;">
+            </div>
+
+            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+              <div class="form-group">
+                <label class="form-label" style="font-size: 0.78rem;">📁 หมวดหลัก (Category)</label>
+                <select id="gdrive-category-select" class="form-control" style="font-size: 0.84rem;" onchange="window.updateGdriveTargetServices()">
+                  <option value="news">📢 ศูนย์ข่าว & ประกาศ</option>
+                  <option value="domestic">🇹🇭 บริการในประเทศ</option>
+                  <option value="international">🌐 บริการระหว่างประเทศ</option>
+                  <option value="coldchain">❄️ FUZE POST ควบคุมอุณหภูมิ</option>
+                  <option value="promotions">🎁 โปรโมชั่น & ส่วนลด</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-size: 0.78rem;">🎯 การ์ดบริการปลายทางที่จะบรรจุข้อมูล</label>
+                <select id="gdrive-target-service-select" class="form-control" style="font-size: 0.84rem; font-weight: 600; color: #ffd60a;">
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label class="form-label" style="font-size: 0.78rem;">📅 วันที่บังคับใช้ / ลว.</label>
+              <button type="button" id="cal-btn-gdrive" onclick="window.openThaiCalendar('gdrive')"
+                style="width: 100%; text-align: left; padding: 7px 10px; background: rgba(255,214,10,0.07); border: 1px solid rgba(255,214,10,0.25); border-radius: var(--radius-sm); color: #aaa; font-size: 0.84rem; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                <span>📅</span><span id="cal-display-gdrive">เลือกวันที่...</span>
+              </button>
+              <input type="hidden" id="gdrive-date-input">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label class="form-label" style="font-size: 0.78rem;">สรุปสาระสำคัญสั้นๆ (ไม่บังคับ)</label>
+              <textarea id="gdrive-summary-input" class="form-control" rows="2" placeholder="สรุปเนื้อหาสำคัญสำหรับเจ้าหน้าที่รับฝาก..." style="font-size: 0.84rem;"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="btn-submit-gdrive" style="width: 100%; justify-content: center; background: #ffd60a; color: #000; font-weight: 700; padding: 10px;">
+              <i data-lucide="sparkles" style="color: #000;"></i> สร้างการ์ด & ฝังเอกสาร Google Drive ทันที
+            </button>
+          </form>
+        </div>
+
+        <!-- Panel 2: Web URL Ingestion Form -->
+        <div id="panel-ingest-weburl" style="display: none;">
+          <form id="form-weburl-ingest">
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label class="form-label" style="font-weight: 600; color: var(--text-primary);">
+                🌐 ลิงก์หน้าเว็บข่าวสาร / ประกาศ ปณท <span style="color: var(--apple-red); font-size: 0.76rem;">*จำเป็น</span>
+              </label>
+              <input type="text" id="weburl-link-input" class="form-control" placeholder="วางลิงก์ เช่น https://postbase.thailandpost.co.th/... หรือ thailandpost.co.th" required style="font-size: 0.86rem;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label class="form-label" style="font-weight: 600; color: var(--text-primary);">
+                📝 ชื่อหัวข้อ / เรื่องของบทความ <span style="color: var(--apple-red); font-size: 0.76rem;">*จำเป็น</span>
+              </label>
+              <input type="text" id="weburl-title-input" class="form-control" placeholder="เช่น อัตราค่าบริการ ขนส่งสิ่งของไปยังปลายทางพื้นที่พิเศษ" required style="font-size: 0.86rem;">
+            </div>
+
+            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px;">
+              <div class="form-group">
+                <label class="form-label" style="font-size: 0.78rem;">📁 หมวดหลัก (Category)</label>
+                <select id="weburl-category-select" class="form-control" style="font-size: 0.84rem;" onchange="window.updateWebUrlTargetServices()">
+                  <option value="news">📢 ศูนย์ข่าว & ประกาศ</option>
+                  <option value="domestic">🇹🇭 บริการในประเทศ</option>
+                  <option value="international">🌐 บริการระหว่างประเทศ</option>
+                  <option value="coldchain">❄️ FUZE POST ควบคุมอุณหภูมิ</option>
+                  <option value="promotions">🎁 โปรโมชั่น & ส่วนลด</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-size: 0.78rem;">🎯 การ์ดบริการปลายทางที่จะบรรจุข้อมูล</label>
+                <select id="weburl-target-service-select" class="form-control" style="font-size: 0.84rem; font-weight: 600; color: #ffd60a;">
+                  <!-- Populated dynamically: create new card or attach to existing service -->
+                </select>
+              </div>
+            </div>
+
+            <!-- Smart Duplicate Detector Banner -->
+            <div id="weburl-duplicate-notice" style="display: none; margin-bottom: 12px; padding: 8px 12px; background: rgba(255, 149, 0, 0.12); border: 1px solid rgba(255, 149, 0, 0.4); border-radius: var(--radius-sm); font-size: 0.8rem; color: #ffb340;">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span>⚠️</span>
+                  <span><strong>ตรวจพบข้อมูลที่คล้ายกัน:</strong> <span id="weburl-duplicate-card-name" style="color: #fff; text-decoration: underline;"></span></span>
+                </div>
+                <button type="button" id="btn-use-duplicate-card" style="background: rgba(255, 149, 0, 0.25); color: #ffd60a; border: 1px solid #ff9500; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; cursor: pointer; font-weight: 600;">
+                  ⚡ เลือกอัปเดตเข้าการ์ดเดิมนี้
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label class="form-label" style="font-size: 0.78rem;">📅 วันที่ประกาศ / มีผลบังคับใช้</label>
+              <button type="button" id="cal-btn-weburl" onclick="window.openThaiCalendar('weburl')"
+                style="width: 100%; text-align: left; padding: 7px 10px; background: rgba(48,209,88,0.07); border: 1px solid rgba(48,209,88,0.25); border-radius: var(--radius-sm); color: #aaa; font-size: 0.84rem; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                <span>📅</span><span id="cal-display-weburl">เลือกวันที่...</span>
+              </button>
+              <input type="hidden" id="weburl-date-input">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label class="form-label" style="font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center;">
+                <span>📋 วางเนื้อหา / ตารางจากเว็บตรงๆ (Quick Paste & Auto-Extract)</span>
+                <span style="font-size: 0.7rem; color: #ffd60a;">✨ ก๊อบปี้ข้อความจากหน้าเว็บมาแปะได้เลย</span>
+              </label>
+              <textarea id="weburl-rawtext-input" class="form-control" rows="3" placeholder="คัดลอก (Ctrl+A / Ctrl+C) เนื้อหา ข้อความ ตาราง หรือประกาศจากหน้าเว็บ Postbase มาวางที่นี่ ระบบจะดึงตาราง สเปก และรายการต้องห้ามให้อัตโนมัติ..." style="font-size: 0.82rem;"></textarea>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 14px; padding: 10px; background: rgba(255, 255, 255, 0.03); border: 1px dashed rgba(255, 255, 255, 0.18); border-radius: var(--radius-sm);">
+              <label class="form-label" style="font-size: 0.78rem; font-weight: 600; color: #64d2ff; display: flex; align-items: center; justify-content: space-between;">
+                <span>📄 แนบไฟล์ PDF คำสั่ง / ประกาศทางการ (ถ้ามี)</span>
+                <span style="font-size: 0.7rem; color: var(--text-tertiary);">อัปโหลด หรือ วางลิงก์ Drive</span>
+              </label>
+              <div style="display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; margin-bottom: 6px;">
+                <input type="text" id="weburl-pdf-link-input" class="form-control" placeholder="วางลิงก์ไฟล์ PDF (Google Drive หรือ URL)" style="font-size: 0.82rem;">
+                <label for="weburl-pdf-file-input" class="btn btn-secondary" style="font-size: 0.78rem; padding: 6px 10px; cursor: pointer; white-space: nowrap; margin: 0;">
+                  📁 เลือกไฟล์ PDF
+                </label>
+                <input type="file" id="weburl-pdf-file-input" accept=".pdf" style="display: none;">
+              </div>
+              <div id="weburl-pdf-filename-display" style="font-size: 0.76rem; color: #30d158; display: none;"></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="btn-submit-weburl" style="width: 100%; justify-content: center; background: #30d158; color: #000; font-weight: 700; padding: 10px;">
+              <i data-lucide="check-circle-2" style="color: #000;"></i> ยืนยันการนำเข้าและบันทึกลงการ์ดบริการ
+            </button>
+          </form>
+        </div>
+
+        <!-- Panel 3: Local File Upload -->
+        <div id="panel-ingest-local" style="display: none;">
+          <div class="pdf-dropzone" id="pdf-dropzone">
+            <input type="file" id="pdf-file-input" accept=".pdf" multiple style="display: none;">
+            <div class="dropzone-icon">
+              <i data-lucide="file-up" style="width: 44px; height: 44px; color: #ffd60a;"></i>
+            </div>
+            <h3 style="margin: 8px 0 4px; font-size: 1.05rem; font-weight: 700; color: #fff;">ลากไฟล์ PDF มาวางที่นี่ (เลือกหลายไฟล์ได้)</h3>
+            <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 14px;">
+              หรือคลิกปุ่มด้านล่างเพื่อเลือกไฟล์จากเครื่อง (ระบบจะอ่านและสร้างการ์ดให้)
+            </p>
+            <button type="button" class="btn btn-primary" id="btn-browse-pdf" style="background: #ffd60a; color: #000; font-weight: 700;">
+              <i data-lucide="folder-open" style="color: #000;"></i> เลือกไฟล์ PDF จากเครื่อง
+            </button>
+          </div>
+
+          <!-- Processing State Indicator -->
+          <div id="pdf-processing-state" style="display: none; text-align: center; padding: 24px 0;">
+            <div class="spinner" style="margin: 0 auto 12px; width: 36px; height: 36px; border: 3px solid rgba(255,214,10,0.2); border-top-color: #ffd60a; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+            <h4 id="pdf-processing-msg" style="font-size: 0.95rem; color: #ffd60a; margin: 0 0 4px;">กำลังอ่านและวิเคราะห์เนื้อหาใน PDF...</h4>
+            <p style="font-size: 0.78rem; color: var(--text-secondary); margin: 0;">ระบบกำลังสกัดเลขที่หนังสือ วันที่ ชื่อเรื่อง และจับคู่บริการที่เกี่ยวข้อง</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Diff & Confirmation Wizard Modal (Before vs After) -->
+  <div class="modal-overlay" id="diff-confirmation-modal">
+    <div class="modal-sheet" style="max-width: 900px; max-height: 90vh;">
+      <div class="modal-sheet-header">
+        <div class="modal-title-group">
+          <div class="modal-title-icon" style="background: linear-gradient(135deg, #30d158, #0071e3);">
+            <i data-lucide="git-compare"></i>
+          </div>
+          <div class="modal-title-text">
+            <h2>🔍 ตรวจสอบและเปรียบเทียบข้อมูลก่อนอัปเดต</h2>
+            <p>ตรวจสอบความถูกต้อง แก้ไขข้อมูลที่อ่านได้ และเลือกการ์ดบริการปลายทาง</p>
+          </div>
+        </div>
+        <button class="btn-icon" id="btn-close-diff-modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-sheet-body" style="padding: 18px;">
+        <form id="diff-confirmation-form">
+          <!-- Main Split Layout: Left (Live PDF Document Viewer) vs Right (Extracted Form & Diff Editor) -->
+          <div class="diff-split-layout">
+            <!-- Left Side: Live PDF Viewer Panel -->
+            <div class="diff-pdf-viewer-card">
+              <div class="diff-pdf-viewer-header">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <i data-lucide="file-text" style="color: #ffd60a; width: 16px; height: 16px;"></i>
+                  <span style="font-size: 0.82rem; font-weight: 700; color: #ffd60a;">📄 เอกสาร PDF ต้นฉบับ (เลื่อนดูได้ทุกหน้า)</span>
+                </div>
+                <span id="diff-pdf-page-count-badge" style="font-size: 0.74rem; padding: 2px 8px; border-radius: 12px; background: rgba(255,214,10,0.18); color: #ffd60a; font-weight: 600;">กำลังโหลดหน้า...</span>
+              </div>
+              <div class="diff-pdf-pages-scroll" id="diff-pdf-pages-container">
+                <!-- PDF Pages Canvas Rendered Dynamically -->
+              </div>
+            </div>
+
+            <!-- Right Side: Extracted Meta & Diff Fields -->
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <!-- Duplicate Ingestion Warning Banner -->
+              <div id="diff-duplicate-alert" style="display: none;"></div>
+
+              <!-- Extracted Meta Header -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px; background: rgba(255,214,10,0.06); border: 1px solid rgba(255,214,10,0.25); border-radius: var(--radius-md);">
+                <div style="grid-column: 1 / -1;">
+                  <label class="form-label" style="color: #ffd60a; font-size: 0.78rem;">🎯 การ์ดบริการเป้าหมายที่จะอัปเดต *</label>
+                  <select id="diff-target-service" class="form-control" required style="font-weight: 600; font-size: 0.84rem;">
+                    <!-- Populated dynamically -->
+                  </select>
+                </div>
+                <div id="diff-new-category-box" style="grid-column: 1 / -1; display: none;">
+                  <label class="form-label" style="color: #64d2ff; font-size: 0.78rem;">📁 หมวดหมู่บริการที่ต้องการสร้าง:</label>
+                  <select id="diff-new-category-type" class="form-control" style="font-size: 0.84rem;">
+                    <option value="news">📢 ศูนย์ข่าว & ประกาศเปลี่ยนแปลงบริการ</option>
+                    <option value="domestic">🇹🇭 บริการในประเทศ</option>
+                    <option value="international">🌐 บริการระหว่างประเทศ</option>
+                    <option value="coldchain">❄️ ควบคุมอุณหภูมิ (FUZE POST)</option>
+                    <option value="promotions">🎁 โปรโมชั่น & ส่วนลดพิเศษ</option>
+                  </select>
+                </div>
+                <div style="grid-column: 1 / -1;">
+                  <label class="form-label" style="color: #ffd60a; font-size: 0.78rem;">🏷️ ชื่อเรื่อง / บันทึกสั่งการที่สกัดได้</label>
+                  <input type="text" id="diff-extracted-title" class="form-control" style="font-size: 0.84rem;" placeholder="ชื่อบันทึกสั่งการหรือบริการ" required>
+                </div>
+                <div>
+                  <label class="form-label" style="color: #ffd60a; font-size: 0.78rem;">📅 วันที่เอกสาร / วันที่มีผล</label>
+                  <input type="date" id="diff-extracted-date" class="form-control" style="font-size: 0.84rem;">
+                </div>
+                <div>
+                  <label class="form-label" style="color: #ffd60a; font-size: 0.78rem;">🔢 เลขที่หนังสืออ้างอิง</label>
+                  <input type="text" id="diff-extracted-ref" class="form-control" style="font-size: 0.84rem;" placeholder="เช่น ปณท บร.(บก.1)/5387">
+                </div>
+              </div>
+
+              <!-- Ingestion Mode Selector -->
+              <div style="padding: 10px 12px; background: rgba(0, 113, 227, 0.08); border: 1px solid rgba(0, 113, 227, 0.3); border-radius: var(--radius-md);">
+                <label class="form-label" style="color: #64d2ff; font-weight: 700; margin-bottom: 6px; font-size: 0.78rem;">📥 รูปแบบการนำเข้าข้อมูล (Ingestion Mode):</label>
+                <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+                  <label style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; cursor: pointer; color: #fff;">
+                    <input type="radio" name="diff-import-mode" id="import-mode-append" value="append" checked>
+                    <strong>📎 เพิ่มเป็นบันทึกคำสั่งใหม่ในบริการนี้ (สเปกเดิมคงเดิม 100%)</strong>
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; cursor: pointer; color: var(--text-secondary);">
+                    <input type="radio" name="diff-import-mode" id="import-mode-replace" value="replace">
+                    <span>🔄 อัปเดตและแทนที่ข้อมูลหลัก</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Side-by-Side Diff Comparison Grid -->
+              <div class="diff-comparison-grid">
+                <!-- Left Panel: Before (Current Data) -->
+                <div class="diff-panel before-panel">
+                  <div class="diff-panel-header">
+                    <span class="diff-tag before">⬅️ ข้อมูลปัจจุบัน (ก่อนอัปเดต)</span>
+                    <span id="diff-before-service-name" style="font-size: 0.76rem; color: var(--text-secondary);"></span>
+                  </div>
+                  <div class="diff-panel-body" id="diff-before-content">
+                    <!-- Dynamically Populated -->
+                  </div>
+                </div>
+
+                <!-- Right Panel: After (Extracted from PDF - Editable) -->
+                <div class="diff-panel after-panel">
+                  <div class="diff-panel-header">
+                    <span class="diff-tag after">✨ ข้อมูลใหม่ที่จะอัปเดต (จาก PDF)</span>
+                    <span style="font-size: 0.74rem; color: var(--apple-mint);">✏️ สามารถแก้ไขตรงนี้ได้</span>
+                  </div>
+                  <div class="diff-panel-body" id="diff-after-content">
+                    <!-- Dynamically Populated Editable Form Fields -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; flex-wrap: wrap; gap: 8px;">
+            <div style="font-size: 0.76rem; color: var(--text-tertiary);">
+              🛡️ ข้อมูลเดิมจะถูกบันทึกใน Snapshot สามารถกดย้อนกลับ (Rollback) ได้ตลอดเวลา
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="btn btn-secondary" id="btn-cancel-diff">ยกเลิก</button>
+              <button type="submit" class="btn btn-primary" id="btn-apply-diff" style="background: var(--apple-mint); color: #000; font-weight: 700;">
+                <i data-lucide="check-circle-2" style="color: #000;"></i> ยืนยันการนำเข้า & อัปเดตข้อมูล
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Version History & Rollback Modal -->
+  <div class="modal-overlay" id="version-history-modal">
+    <div class="modal-sheet" style="max-width: 650px; max-height: 85vh;">
+      <div class="modal-sheet-header">
+        <div class="modal-title-group">
+          <div class="modal-title-icon" style="background: linear-gradient(135deg, #64d2ff, #0071e3);">
+            <i data-lucide="history"></i>
+          </div>
+          <div class="modal-title-text">
+            <h2>⏮️ ประวัติการแก้ไข & กู้คืนข้อมูลเดิม (Rollback)</h2>
+            <p id="history-modal-subtitle">รายการประวัติและ Snapshot ข้อมูลก่อนหน้า</p>
+          </div>
+        </div>
+        <button class="btn-icon" id="btn-close-history-modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-sheet-body" style="padding: 18px;">
+        <div id="version-history-list">
+          <!-- Dynamically populated timeline -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Move Memo / Document Modal -->
+  <div class="modal-overlay" id="move-memo-modal">
+    <div class="modal-sheet" style="max-width: 560px;">
+      <div class="modal-sheet-header">
+        <div class="modal-title-group">
+          <div class="modal-title-icon" style="background: linear-gradient(135deg, #ffd60a, #ff9500);">
+            <i data-lucide="arrow-right-left"></i>
+          </div>
+          <div class="modal-title-text">
+            <h2>🔄 ย้ายเอกสาร / บันทึกสั่งการไปยังบริการอื่น</h2>
+            <p>เลือกการ์ดบริการปลายทางที่ต้องการย้ายข้อมูลไปผูกไว้</p>
+          </div>
+        </div>
+        <button class="btn-icon" id="btn-close-move-modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-sheet-body" style="padding: 18px;">
+        <form id="move-memo-form">
+          <input type="hidden" id="move-source-service-id">
+          <input type="hidden" id="move-source-block-id">
+          <input type="hidden" id="move-is-full-card" value="false">
+
+          <div style="padding: 12px; background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); margin-bottom: 14px;">
+            <div style="font-size: 0.76rem; color: var(--text-secondary); margin-bottom: 4px;">📤 รายการที่จะย้าย:</div>
+            <div id="move-source-item-display" style="font-weight: 700; color: #ffd60a; font-size: 0.9rem; line-height: 1.4;"></div>
+            <div id="move-source-service-display" style="font-size: 0.76rem; color: var(--text-tertiary); margin-top: 4px;"></div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label" style="color: #64d2ff; font-weight: 700;">🎯 เลือกการ์ดบริการปลายทางที่ถูกต้อง *</label>
+            <select id="move-target-service-id" class="form-control" required style="font-size: 0.88rem; font-weight: 600;">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+
+          <div style="font-size: 0.76rem; color: var(--text-tertiary); line-height: 1.4; margin-bottom: 14px;">
+            ℹ️ บันทึกและไฟล์ PDF จะถูกย้ายไปเพิ่มในการ์ดบริการปลายทาง และลบออกจากบริการต้นทางโดยอัตโนมัติ
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 8px;">
+            <button type="button" class="btn btn-secondary" id="btn-cancel-move">ยกเลิก</button>
+            <button type="submit" class="btn btn-primary" id="btn-confirm-move" style="background: #ffd60a; color: #000; font-weight: 700;">
+              <i data-lucide="check" style="color: #000;"></i> ยืนยันการย้ายเอกสาร
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- In-App Fullscreen Document / PDF Viewer Modal with Zoom Engine -->
+  <div class="modal-overlay" id="fullscreen-doc-modal" style="padding: 0; z-index: 9999;">
+    <div class="modal-sheet" style="max-width: 100vw; width: 100vw; height: 100vh; max-height: 100vh; border-radius: 0; display: flex; flex-direction: column; background: #0b0d14;">
+      <div class="modal-sheet-header" style="padding: 10px 14px; background: #121520; border-bottom: 1px solid var(--border-subtle); flex-shrink: 0;">
+        <div class="modal-title-group" style="overflow: hidden; max-width: 45%;">
+          <div class="modal-title-icon" style="background: linear-gradient(135deg, var(--apple-orange), #ffd60a); width: 32px; height: 32px;">
+            <i data-lucide="file-text" style="width: 16px; height: 16px; color: #000;"></i>
+          </div>
+          <div class="modal-title-text" style="overflow: hidden;">
+            <h2 id="fullscreen-doc-title" style="font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">เอกสาร PDF</h2>
+            <p id="fullscreen-doc-subtitle" style="font-size: 0.7rem; color: var(--text-tertiary);">ศูนย์ข้อมูล Service Hub</p>
+          </div>
+        </div>
+
+        <!-- Zoom & Action Controls -->
+        <div style="display: flex; align-items: center; gap: 5px;">
+          <button class="btn btn-secondary" id="btn-doc-zoom-out" style="padding: 4px 8px; font-size: 0.74rem;" title="ย่อขนาด (-)">
+            <i data-lucide="zoom-out" style="width: 14px; height: 14px;"></i>
+          </button>
+          <span id="doc-zoom-level-label" style="font-size: 0.74rem; font-weight: 700; color: #64d2ff; min-width: 44px; text-align: center;">100%</span>
+          <button class="btn btn-secondary" id="btn-doc-zoom-in" style="padding: 4px 8px; font-size: 0.74rem;" title="ขยายขนาด (+)">
+            <i data-lucide="zoom-in" style="width: 14px; height: 14px;"></i>
+          </button>
+          <button class="btn btn-secondary" id="btn-doc-zoom-reset" style="padding: 4px 8px; font-size: 0.74rem;" title="รีเซ็ตขนาด 100%">
+            <i data-lucide="rotate-ccw" style="width: 13px; height: 13px;"></i>
+          </button>
+          <a id="btn-doc-external-link" href="#" target="_blank" rel="noreferrer noopener" class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.74rem; color: #ffd60a;" title="เปิดในแท็บใหม่">
+            <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
+          </a>
+          <button class="btn-icon" id="btn-close-fullscreen-doc" title="ปิดหน้าต่าง" style="width: 32px; height: 32px; background: rgba(255,255,255,0.08);">
+            <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-sheet-body" id="fullscreen-doc-body" style="flex: 1; padding: 0; overflow: auto; display: flex; align-items: center; justify-content: center; background: #000; -webkit-overflow-scrolling: touch;">
+        <div id="fullscreen-doc-zoom-wrapper" style="width: 100%; height: 100%; transform-origin: top center; transition: transform 0.15s ease-out; display: flex; justify-content: center;">
+          <iframe id="fullscreen-doc-iframe" src="" style="width: 100%; height: 100%; border: none;" allow="autoplay"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Migration & Drive Transfer Modal (Admin Only) -->
+  <div class="modal-overlay" id="data-migration-modal">
+    <div class="modal-sheet" style="max-width: 680px;">
+      <div class="modal-sheet-header">
+        <div class="modal-title-group">
+          <div class="modal-title-icon" style="background: var(--apple-yellow); color: #000;">
+            <i data-lucide="arrow-right-left"></i>
+          </div>
+          <div class="modal-title-text">
+            <h2>โอนย้าย Google Drive & สำรองฐานข้อมูล</h2>
+            <p>ย้ายเอกสารจากเมลส่วนตัวไป Drive แผนก (pnk10501@gmail.com) หรือสำรองข้อมูล</p>
+          </div>
+        </div>
+        <button class="btn-icon" id="btn-close-data-migration">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <div class="modal-sheet-body" style="padding: 20px;">
+        <!-- Step 1: Google Drive Transfer Guide -->
+        <div style="background: rgba(255, 214, 10, 0.08); border: 1px solid rgba(255, 214, 10, 0.3); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+          <div style="display: flex; align-items: center; gap: 8px; font-weight: 700; color: #ffd60a; margin-bottom: 8px;">
+            <i data-lucide="folder-sync"></i> วิธีโอนย้ายไฟล์ใน Google Drive ไปยังเมลแผนก
+          </div>
+          <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px;">
+            เพื่อไม่ให้ไฟล์ค้างอยู่ในเมลส่วนตัว (<strong>khunnawut.yu@gmail.com</strong>) คุณสามารถมอบสิทธิ์ความเป็นเจ้าของโฟลเดอร์เอกสารทั้งหมดให้ <strong>pnk10501@gmail.com</strong> ได้ง่ายๆ ดังนี้:
+          </p>
+          <ol style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.7; padding-left: 20px; margin-bottom: 14px;">
+            <li>เปิดโฟลเดอร์เอกสารใน Google Drive ของเมลส่วนตัว</li>
+            <li>กดปุ่ม <strong>แชร์ (Share)</strong> ➔ พิมพ์ใส่อีเมล <code>pnk10501@gmail.com</code></li>
+            <li>ในช่องสิทธิ์ ให้เลือกเป็น <strong>"ผู้แก้ไข (Editor)"</strong> แล้วกดส่ง</li>
+            <li>กดเปิดหน้าแชร์อีกครั้ง ➔ คลิกเมนูดรอปดาวน์ข้างชื่อ <code>pnk10501@gmail.com</code> ➔ เลือก <strong>"โอนความเป็นเจ้าของ (Transfer Ownership)"</strong></li>
+          </ol>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="./all_thp_docs_for_drive.zip" download="all_thp_docs_for_drive.zip" class="btn btn-primary" style="font-size: 0.8rem; background: #30d158; color: #000; font-weight: 700; text-decoration: none;">
+              <i data-lucide="download" style="width: 14px; height: 14px; color: #000;"></i> 📦 1. ดาวน์โหลดไฟล์ PDF ทั้งหมดในแอป (.ZIP)
+            </a>
+            <a href="https://drive.google.com/drive/folders/1zIKsjC6ldpxVdxTK5ofwE358YJUkmthG?authuser=pnk10501@gmail.com" target="_blank" rel="noreferrer noopener" class="btn btn-secondary" style="font-size: 0.8rem; color: #64d2ff; border-color: rgba(100, 210, 255, 0.4); text-decoration: none;">
+              <i data-lucide="upload-cloud" style="width: 14px; height: 14px;"></i> 2. เปิด Drive ปณท เพื่อโยนไฟล์ลงโฟลเดอร์
+            </a>
+          </div>
+        </div>
+
+        <!-- Step 2: System Data Backup & Export -->
+        <div style="background: rgba(0, 113, 227, 0.08); border: 1px solid rgba(0, 113, 227, 0.3); border-radius: 12px; padding: 16px;">
+          <div style="display: flex; align-items: center; gap: 8px; font-weight: 700; color: #64d2ff; margin-bottom: 8px;">
+            <i data-lucide="database"></i> สำรอง & กู้คืนฐานข้อมูลการ์ดบริการทั้งหมด (JSON Backup)
+          </div>
+          <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px;">
+            ดาวน์โหลดข้อมูลการ์ดบริการทั้งหมด (รวมรหัส New CA POS, บันทึกสั่งการ, สเปก, ตารางราคา) เก็บไว้เป็นไฟล์สำรองฉุกเฉิน
+          </p>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn btn-primary" id="btn-export-database" style="font-size: 0.82rem;">
+              <i data-lucide="download"></i> 📦 ดาวน์โหลดไฟล์สำรองข้อมูล (Export JSON)
+            </button>
+            <label class="btn btn-secondary" style="font-size: 0.82rem; cursor: pointer; margin: 0;">
+              <i data-lucide="upload"></i> 📥 นำเข้าไฟล์กู้คืน (Restore JSON)
+              <input type="file" id="input-import-database" accept=".json" style="display: none;">
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- ====== Thai Calendar Popup (shared, positioned absolutely) ====== -->
+  <div id="thai-cal-popup" style="display:none; position:fixed; z-index:99999; background:#1c1c1e; border:1px solid rgba(255,255,255,0.12); border-radius:14px; box-shadow:0 16px 48px rgba(0,0,0,0.7); padding:14px; width:280px; user-select:none;">
+    <!-- Header: prev / month+year / next -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+      <button type="button" id="cal-prev-month" style="background:none; border:none; color:#aaa; font-size:1.2rem; cursor:pointer; padding:2px 8px; border-radius:6px;">‹</button>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <select id="cal-header-month" style="background:#2c2c2e; color:#fff; border:1px solid rgba(255,255,255,0.1); border-radius:6px; font-size:0.82rem; padding:3px 5px; cursor:pointer;"></select>
+        <select id="cal-header-year" style="background:#2c2c2e; color:#fff; border:1px solid rgba(255,255,255,0.1); border-radius:6px; font-size:0.82rem; padding:3px 5px; cursor:pointer;"></select>
+      </div>
+      <button type="button" id="cal-next-month" style="background:none; border:none; color:#aaa; font-size:1.2rem; cursor:pointer; padding:2px 8px; border-radius:6px;">›</button>
+    </div>
+    <!-- Day-of-week labels -->
+    <div id="cal-dow" style="display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin-bottom:4px; text-align:center; font-size:0.7rem; color:#666; font-weight:600;">
+      <span>อา</span><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span>ส</span>
+    </div>
+    <!-- Day cells -->
+    <div id="cal-days" style="display:grid; grid-template-columns:repeat(7,1fr); gap:2px;"></div>
+    <!-- Footer: clear + today -->
+    <div style="display:flex; justify-content:space-between; margin-top:10px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06);">
+      <button type="button" id="cal-clear-btn" style="font-size:0.74rem; color:#ff453a; background:none; border:none; cursor:pointer; padding:2px 4px;">✕ ล้าง</button>
+      <button type="button" id="cal-today-btn" style="font-size:0.74rem; color:#64d2ff; background:none; border:none; cursor:pointer; padding:2px 4px;">วันนี้</button>
+    </div>
+  </div>
+
+  <!-- App Script with Cache Buster -->
+  <script type="module" src="app.js?v=139.0"></script>
+</body>
+</html>

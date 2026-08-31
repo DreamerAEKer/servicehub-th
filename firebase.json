@@ -1,0 +1,30 @@
+{
+  "hosting": [
+    {
+      "site": "servicehub-th",
+      "public": "public",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    },
+    {
+      "site": "dept-doc-vault",
+      "public": "public",
+      "redirects": [
+        {
+          "source": "**",
+          "destination": "https://servicehub-th.web.app",
+          "type": 301
+        }
+      ]
+    }
+  ]
+}

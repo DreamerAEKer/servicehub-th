@@ -1,0 +1,19 @@
+{
+  "name": "dept-doc-vault",
+  "version": "1.0.0",
+  "description": "Department Document Vault for storing PDFs and Images with SQLite database and robust backup.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.10",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1",
+    "pdf-lib": "^1.17.1",
+    "pdf-parse": "^2.4.5",
+    "sqlite3": "^5.1.7"
+  }
+}
