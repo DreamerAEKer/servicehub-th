@@ -877,7 +877,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 0.45);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-pill);
   padding: 4px 6px;
@@ -890,9 +890,9 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 12px;
+  padding: 6px 14px;
   border-radius: var(--radius-pill);
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--text-secondary);
   background: transparent;
@@ -910,35 +910,19 @@ body {
 .pane-toggle-btn.active {
   background: var(--apple-blue);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.35);
+  box-shadow: 0 2px 10px rgba(0, 113, 227, 0.45);
 }
 
 .service-dual-pane-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
   gap: 16px;
+  width: 100%;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.service-dual-pane-layout.collapse-domestic {
-  grid-template-columns: 0fr 1fr;
-  gap: 0;
-}
-.service-dual-pane-layout.collapse-domestic .pane-domestic {
-  display: none;
-  opacity: 0;
-}
-
-.service-dual-pane-layout.collapse-intl {
-  grid-template-columns: 1fr 0fr;
-  gap: 0;
-}
-.service-dual-pane-layout.collapse-intl .pane-international {
-  display: none;
-  opacity: 0;
-}
-
 .service-scope-column {
+  flex: 1 1 50%;
+  min-width: 0;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
@@ -947,7 +931,23 @@ body {
   flex-direction: column;
   gap: 10px;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+}
+
+.service-dual-pane-layout.collapse-domestic .pane-domestic {
+  display: none !important;
+}
+
+.service-dual-pane-layout.collapse-domestic .pane-international {
+  flex: 1 1 100% !important;
+}
+
+.service-dual-pane-layout.collapse-intl .pane-international {
+  display: none !important;
+}
+
+.service-dual-pane-layout.collapse-intl .pane-domestic {
+  flex: 1 1 100% !important;
 }
 
 .service-scope-column.pane-domestic {
@@ -977,11 +977,7 @@ body {
 
 @media (max-width: 768px) {
   .service-dual-pane-layout {
-    grid-template-columns: 1fr;
-  }
-  .service-dual-pane-layout.collapse-domestic,
-  .service-dual-pane-layout.collapse-intl {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 }
 
