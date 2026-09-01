@@ -2088,13 +2088,149 @@ body {
   color: var(--text-secondary);
 }
 
-.history-details {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  line-height: 1.5;
-  background: rgba(0, 0, 0, 0.2);
-  padding: 8px 10px;
-  border-radius: var(--radius-sm);
-  margin-bottom: 10px;
+/* ==========================================================================
+   Light Theme / Clean Modern Style (Off-White & Charcoal)
+   ========================================================================== */
+body.light-theme {
+  --apple-bg: #f8fafc;
+  --apple-sidebar: #ffffff;
+  --apple-surface: #ffffff;
+  --apple-surface-card: #ffffff;
+  --apple-surface-hover: #f1f5f9;
+  --border-subtle: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --border-glow: rgba(0, 113, 227, 0.2);
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+  --text-link: #0284c7;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.12);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-card-hover: 0 10px 25px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+body.light-theme .top-toolbar {
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+body.light-theme .sidebar-header {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+body.light-theme .sidebar {
+  border-right: 1px solid #e2e8f0;
+}
+
+body.light-theme .logo-text h1 {
+  color: #0f172a;
+}
+
+body.light-theme .section-top-bar h2 {
+  color: #0f172a;
+}
+
+body.light-theme .service-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: var(--shadow-card);
+}
+
+body.light-theme .service-card:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: var(--shadow-card-hover);
+}
+
+body.light-theme .service-card-title h3 {
+  color: #0f172a;
+}
+
+body.light-theme .service-quick-chips {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+}
+
+body.light-theme .service-card-footer {
+  border-top: 1px solid #f1f5f9;
+}
+
+body.light-theme .modal-sheet {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+body.light-theme .modal-sheet-header {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+body.light-theme .modal-title-text h2 {
+  color: #0f172a;
+}
+
+body.light-theme .form-control,
+body.light-theme .form-select {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+body.light-theme .form-control:focus,
+body.light-theme .form-select:focus {
+  background: #ffffff;
+  border-color: var(--apple-blue);
+}
+
+body.light-theme .specs-table {
+  color: #0f172a;
+}
+
+body.light-theme .specs-table th {
+  background: #f8fafc;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+
+body.light-theme .specs-table td {
+  border-color: #e2e8f0;
+}
+
+body.light-theme .search-bar {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+body.light-theme .search-bar input {
+  color: #0f172a;
+}
+
+body.light-theme .switcher-btn {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+
+body.light-theme .switcher-btn.active {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+}
+
+body.light-theme .theme-toggle-btn {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+body.light-theme .theme-toggle-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
 }
 

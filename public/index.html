@@ -39,7 +39,7 @@
           <div class="logo-text">
             <div style="display: flex; align-items: center; gap: 6px;">
               <h1>Service Hub</h1>
-              <span style="font-size: 0.68rem; font-weight: 700; background: rgba(100, 210, 255, 0.15); color: #64d2ff; border: 1px solid rgba(100, 210, 255, 0.35); padding: 1px 6px; border-radius: var(--radius-pill);" id="sidebar-app-version">v141.0</span>
+              <span style="font-size: 0.68rem; font-weight: 700; background: rgba(100, 210, 255, 0.15); color: #64d2ff; border: 1px solid rgba(100, 210, 255, 0.35); padding: 1px 6px; border-radius: var(--radius-pill);" id="sidebar-app-version">v142.0</span>
             </div>
             <p>ศูนย์ข้อมูลรับฝาก & SOP</p>
           </div>
@@ -125,6 +125,12 @@
           <!-- Top Bar Admin Login Trigger (Discreet Key icon when not logged in) -->
           <button class="btn-icon" id="btn-open-admin-login-top" style="display: inline-flex;" title="เข้าสู่ระบบ Admin">
             <i data-lucide="key-round" style="width: 15px; height: 15px; color: var(--text-tertiary);"></i>
+          </button>
+
+          <!-- Theme Switcher (Dark / Light) -->
+          <button class="btn btn-secondary theme-toggle-btn" id="btn-toggle-theme" title="สลับโหมดธีม สว่าง (Light) / มืด (Dark)">
+            <i data-lucide="sun" id="theme-icon-sun" style="width: 16px; height: 16px; display: none;"></i>
+            <i data-lucide="moon" id="theme-icon-moon" style="width: 16px; height: 16px;"></i>
           </button>
 
           <!-- Calendar Button in Top Bar -->
