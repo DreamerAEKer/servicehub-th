@@ -24,7 +24,7 @@ import {
   getDownloadURL
 } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js';
 
-const APP_VERSION = 'v142.0';
+const APP_VERSION = 'v143.0';
 const DEFAULT_ADMIN_PIN = '10501';
 const DEFAULT_RECOVERY_KEY = 'Gpo10501';
 const REGISTERED_ADMIN_EMAIL = 'pnk10501@gmail.com';
@@ -7526,32 +7526,6 @@ function setupEventListeners() {
       renderServicesView();
     };
   });
-
-  // Theme Toggle Button (Light / Dark)
-  const btnToggleTheme = document.getElementById('btn-toggle-theme');
-  const themeIconSun = document.getElementById('theme-icon-sun');
-  const themeIconMoon = document.getElementById('theme-icon-moon');
-
-  const updateThemeUI = (isLight) => {
-    document.body.classList.toggle('light-theme', isLight);
-    if (themeIconSun) themeIconSun.style.display = isLight ? 'inline-block' : 'none';
-    if (themeIconMoon) themeIconMoon.style.display = isLight ? 'none' : 'inline-block';
-    lucide.createIcons();
-  };
-
-  // Check saved theme
-  const savedTheme = localStorage.getItem('dept_theme_mode') || 'dark';
-  updateThemeUI(savedTheme === 'light');
-
-  if (btnToggleTheme) {
-    btnToggleTheme.onclick = () => {
-      const isCurrentlyLight = document.body.classList.contains('light-theme');
-      const nextIsLight = !isCurrentlyLight;
-      localStorage.setItem('dept_theme_mode', nextIsLight ? 'light' : 'dark');
-      updateThemeUI(nextIsLight);
-      showToast(nextIsLight ? '☀️ เปลี่ยนเป็นธีมสว่าง (Light Mode)' : '🌙 เปลี่ยนเป็นธีมมืด (Dark Mode)', 'info');
-    };
-  }
 
   btnMobileMenu.onclick = openMobileSidebar;
   sidebarBackdrop.onclick = closeMobileSidebar;
