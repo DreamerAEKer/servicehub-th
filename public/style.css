@@ -330,10 +330,10 @@ body {
 }
 
 .switcher-btn.active {
-  background: #1e1e1e;
+  background: #44403c; /* เทาเข้มคุมโทน นุ่มนวล ไม่ดำโดด */
   color: #ffffff;
   font-weight: 600;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
 .switcher-btn.is-draggable-tab {
@@ -931,9 +931,9 @@ body {
 }
 
 .pane-toggle-btn.active {
-  background: #1e1e1e;
+  background: #44403c;
   color: #ffffff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
 .service-dual-pane-layout {

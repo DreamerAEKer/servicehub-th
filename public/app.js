@@ -24,7 +24,7 @@ import {
   getDownloadURL
 } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js';
 
-const APP_VERSION = 'v143.0';
+const APP_VERSION = 'v143.1';
 const DEFAULT_ADMIN_PIN = '10501';
 const DEFAULT_RECOVERY_KEY = 'Gpo10501';
 const REGISTERED_ADMIN_EMAIL = 'pnk10501@gmail.com';
